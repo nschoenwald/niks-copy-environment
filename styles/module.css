@@ -1,0 +1,31 @@
+@charset "UTF-8";
+#niks-copy-environment-settings fieldset th.property {
+  text-align: left;
+}
+#niks-copy-environment-settings fieldset td {
+  word-break: break-all;
+  vertical-align: top;
+}
+#niks-copy-environment-settings fieldset td:first-of-type {
+  width: 21%;
+}
+#niks-copy-environment-settings form {
+  max-height: 100%;
+}
+#niks-copy-environment-settings form tbody {
+  border-bottom: 1px solid #777;
+}
+#niks-copy-environment-settings form tbody tr.none {
+  display: none;
+}
+#niks-copy-environment-settings form tbody tr span.show-settings {
+  text-decoration: underline;
+  cursor: pointer;
+}
+#niks-copy-environment-settings section.import-properties {
+  overflow: auto;
+  margin-bottom: 10px;
+}
+#niks-copy-environment-settings .noflex {
+  flex: 0;
+}

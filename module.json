@@ -1,0 +1,79 @@
+{
+  "id": "niks-copy-environment",
+  "title": "Nik's Copy Environment",
+  "description": "Allows for copying list of system/modules and versions, and gives ability to export/import game and player settings",
+  "authors": [
+    {
+      "name": "Blair McMillan",
+      "url": "https://github.com/sneat",
+      "discord": "blair#9056"
+    },
+    {
+      "name": "Forien",
+      "url": "https://www.patreon.com/forien",
+      "discord": "Forien#2130"
+    },
+    {
+      "name": "Nik",
+      "discord": "nikolai.sw"
+    }
+  ],
+  "url": "https://github.com/nschoenwald/niks-copy-environment",
+  "bugs": "https://github.com/nschoenwald/niks-copy-environment/issues",
+  "changelog": "https://github.com/nschoenwald/niks-copy-environment/blob/master/changelog.md",
+  "version": "4.0.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": [
+    "/scripts/module.js"
+  ],
+  "styles": [
+    "/styles/module.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    },
+    {
+      "lang": "ja",
+      "name": "日本語",
+      "path": "languages/ja.json"
+    },
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "languages/de.json"
+    },
+    {
+      "lang": "pt",
+      "name": "Português",
+      "path": "languages/pt.json"
+    },
+    {
+      "lang": "pl",
+      "name": "Polski",
+      "path": "languages/pl.json"
+    },
+    {
+      "lang": "it",
+      "name": "Italiano",
+      "path": "languages/it.json"
+    },
+    {
+      "lang": "fr",
+      "name": "Français",
+      "path": "languages/fr.json"
+    }
+  ],
+  "packs": [],
+  "socket": false,
+  "manifest": "https://github.com/nschoenwald/niks-copy-environment/releases/latest/download/module.json",
+  "download": "https://github.com/nschoenwald/niks-copy-environment/releases/latest/download/module.zip",
+  "protected": false,
+  "coreTranslation": false,
+  "library": true
+}
