@@ -22,12 +22,16 @@ Go to Settings tab in Sidebar and **right click** on data **below** "General Inf
 
 ## Features
 
-* Copy Environment (core, system and module versions) to clipboard
-* Save Environment (including manifest links) as a JSON file
-* Export game settings (both 'world' and 'client' scopes)
-* Import game settings ('client' ones, and if you are GM also 'world' ones - you will be able to choose which ones you want to import)
-
-*Please note that importing 'world' scope settings en masse as GM might cause some issues to connected players. I advise players should logout before attempting to import World Settings*
+* **Copy Environment**: Copy core, system, and module versions to clipboard as plain text.
+* **Save Environment**: Save environment data (including manifest links) as a JSON file.
+* **Interactive Settings Exporter (`SettingsExportApp`)**:
+  - Preview and filter which settings, modules, and player data to export.
+  - Distinguishes **Active**, **Inactive**, and **Orphaned** settings (uninstalled module leftovers).
+  - Quick bulk actions ("Select All", "Active Only", "Deselect All").
+* **Interactive Settings Importer (`SettingsImportApp`)**:
+  - Live diff view comparing current world settings against the import file.
+  - Classifies modules by target world state: **Active**, **Inactive**, or **Not Installed (Missing)** with safety alerts.
+  - Granular selection of world settings, client settings, and individual player configurations.
 
 ## Info for Module Developers
 

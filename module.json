@@ -21,7 +21,7 @@
   "url": "https://github.com/nschoenwald/niks-copy-environment",
   "bugs": "https://github.com/nschoenwald/niks-copy-environment/issues",
   "changelog": "https://github.com/nschoenwald/niks-copy-environment/blob/master/changelog.md",
-  "version": "14.1.0",
+  "version": "14.2.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14"

@@ -1,0 +1,235 @@
+<div class="niks-app-wrapper flexcol">
+  <!-- Warning Banners -->
+  <div class="alert-banner core-module-warning hidden">
+    <i class="fa-solid fa-triangle-exclamation" inert></i>
+    <div>
+      <strong>{{localize 'niks-copy-environment.import.warning'}}:</strong>
+      {{localize 'niks-copy-environment.import.warningMessage'}}
+    </div>
+  </div>
+
+  <div class="alert-banner missing-modules-warning hidden">
+    <i class="fa-solid fa-circle-exclamation" inert></i>
+    <div>
+      <strong>{{localize 'niks-copy-environment.badges.missing'}}:</strong>
+      {{localize 'niks-copy-environment.import.missingNotice'}}
+    </div>
+  </div>
+
+  <!-- Header / Controls Bar -->
+  <header class="app-toolbar">
+    <div class="search-bar">
+      <i class="fa-solid fa-magnifying-glass search-icon" inert></i>
+      <input type="text" class="search-input" placeholder="{{localize 'niks-copy-environment.import.searchPlaceholder'}}" autocomplete="off" />
+    </div>
+
+    <div class="filter-pills">
+      <button type="button" class="filter-pill active" data-action="filterStatus" data-filter="all">
+        {{localize 'niks-copy-environment.filters.all'}} <span class="pill-count">{{counts.total}}</span>
+      </button>
+      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="changed">
+        <i class="fa-solid fa-pen-to-square status-icon changed" inert></i> {{localize 'niks-copy-environment.filters.changed'}} <span class="pill-count">{{counts.changed}}</span>
+      </button>
+      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="active">
+        <i class="fa-solid fa-circle-check status-icon active" inert></i> {{localize 'niks-copy-environment.badges.active'}} <span class="pill-count">{{counts.active}}</span>
+      </button>
+      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="inactive">
+        <i class="fa-solid fa-circle-pause status-icon inactive" inert></i> {{localize 'niks-copy-environment.badges.inactive'}} <span class="pill-count">{{counts.inactive}}</span>
+      </button>
+      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="missing">
+        <i class="fa-solid fa-triangle-exclamation status-icon missing" inert></i> {{localize 'niks-copy-environment.badges.missing'}} <span class="pill-count">{{counts.missing}}</span>
+      </button>
+      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="players">
+        <i class="fa-solid fa-users status-icon player" inert></i> {{localize 'niks-copy-environment.badges.players'}} <span class="pill-count">{{players.length}}</span>
+      </button>
+    </div>
+
+    <div class="bulk-actions-bar">
+      <div class="bulk-buttons">
+        <button type="button" class="button-compact" data-action="toggleAll">
+          <i class="fa-solid fa-check-double" inert></i> {{localize 'niks-copy-environment.actions.selectAll'}}
+        </button>
+        <button type="button" class="button-compact" data-action="toggleActiveOnly">
+          <i class="fa-solid fa-filter-circle-check" inert></i> {{localize 'niks-copy-environment.actions.activeOnly'}}
+        </button>
+        <button type="button" class="button-compact" data-action="deselectAll">
+          <i class="fa-solid fa-xmark" inert></i> {{localize 'niks-copy-environment.actions.deselectAll'}}
+        </button>
+      </div>
+      <div class="selection-summary"></div>
+    </div>
+  </header>
+
+  <!-- Scrollable Content Area -->
+  <main class="app-body custom-scroll">
+    <!-- Groups List -->
+    {{#each groups as |group|}}
+    <section class="module-card" data-type="{{group.type}}" data-id="{{group.id}}" data-title="{{group.title}}" data-has-changes="{{group.hasChanges}}">
+      <div class="module-header">
+        <label class="group-select-label">
+          <input type="checkbox" class="group-toggle" data-action="toggleGroup" {{#if (ne group.type 'missing')}}checked{{/if}} />
+        </label>
+        <button type="button" class="collapse-toggle" data-action="toggleAccordion">
+          <i class="fa-solid fa-chevron-down" inert></i>
+        </button>
+        <div class="module-title-wrap" data-action="toggleAccordion">
+          <span class="module-title">{{group.title}}</span>
+          {{#if group.version}}<span class="module-version">v{{group.version}}</span>{{/if}}
+        </div>
+
+        <div class="module-badges">
+          {{#if (eq group.type 'core')}}
+            <span class="badge badge-core"><i class="fa-solid fa-cube" inert></i> Core</span>
+          {{else if (eq group.type 'system')}}
+            <span class="badge badge-system"><i class="fa-solid fa-shield-halved" inert></i> System</span>
+          {{else if (eq group.type 'active')}}
+            <span class="badge badge-active"><i class="fa-solid fa-circle-check" inert></i> Active</span>
+          {{else if (eq group.type 'inactive')}}
+            <span class="badge badge-inactive"><i class="fa-solid fa-circle-pause" inert></i> Inactive in World</span>
+          {{else if (eq group.type 'missing')}}
+            <span class="badge badge-missing" title="{{localize 'niks-copy-environment.badges.missingTooltip'}}"><i class="fa-solid fa-triangle-exclamation" inert></i> Not Installed</span>
+          {{/if}}
+          <span class="badge badge-count">{{group.settings.length}}</span>
+        </div>
+      </div>
+
+      <div class="module-settings-list">
+        {{#each group.settings as |setting|}}
+        <div class="setting-row diff-row" data-key="{{setting.key}}">
+          <label class="setting-item-label">
+            <input type="checkbox" class="setting-checkbox" data-key="{{setting.key}}" data-value="{{setting.rawSetting.value}}" {{#if setting.isSelected}}checked{{/if}} />
+            <div class="setting-info">
+              <span class="setting-key">{{setting.key}}</span>
+            </div>
+          </label>
+
+          <div class="setting-diff-grid">
+            <div class="diff-block diff-new">
+              <span class="diff-label">{{localize 'niks-copy-environment.import.newValue'}}</span>
+              <span class="diff-value">{{setting.newString}}</span>
+            </div>
+            <div class="diff-block diff-old">
+              <span class="diff-label">{{localize 'niks-copy-environment.import.currentValue'}}</span>
+              <span class="diff-value">{{setting.oldString}}</span>
+            </div>
+          </div>
+
+          <div class="setting-meta">
+            {{#if setting.isChanged}}
+              <span class="tag tag-modified">{{localize 'niks-copy-environment.export.modifiedTag'}}</span>
+            {{else}}
+              <span class="tag tag-unchanged">{{localize 'niks-copy-environment.export.unchangedTag'}}</span>
+            {{/if}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </section>
+    {{/each}}
+
+    <!-- Players Card -->
+    {{#if players.length}}
+    <section class="players-card" data-type="players">
+      <div class="module-header">
+        <label class="group-select-label">
+          <input type="checkbox" class="group-toggle" data-action="toggleGroup" checked />
+        </label>
+        <button type="button" class="collapse-toggle" data-action="toggleAccordion">
+          <i class="fa-solid fa-chevron-down" inert></i>
+        </button>
+        <div class="module-title-wrap" data-action="toggleAccordion">
+          <span class="module-title">{{localize 'niks-copy-environment.badges.players'}}</span>
+        </div>
+        <div class="module-badges">
+          <span class="badge badge-player"><i class="fa-solid fa-users" inert></i> Users</span>
+          <span class="badge badge-count">{{players.length}}</span>
+        </div>
+      </div>
+
+      <div class="players-list">
+        {{#each players as |player|}}
+        <div class="player-block">
+          <div class="player-header">
+            <strong>{{player.name}}</strong>
+          </div>
+          {{#each player.differences as |diff|}}
+          <div class="setting-row diff-row">
+            <label class="setting-item-label">
+              <input type="checkbox" class="player-field-checkbox" data-player="{{../name}}" data-type="core" data-field="{{diff.field}}" data-newval="{{diff.newString}}" checked />
+              <div class="setting-info">
+                <span class="setting-name">{{diff.field}}</span>
+              </div>
+            </label>
+            <div class="setting-diff-grid">
+              <div class="diff-block diff-new">
+                <span class="diff-label">{{localize 'niks-copy-environment.import.newValue'}}</span>
+                <span class="diff-value">{{diff.newString}}</span>
+              </div>
+              <div class="diff-block diff-old">
+                <span class="diff-label">{{localize 'niks-copy-environment.import.currentValue'}}</span>
+                <span class="diff-value">{{diff.oldString}}</span>
+              </div>
+            </div>
+          </div>
+          {{/each}}
+          {{#each player.flagDifferences as |flagDiff|}}
+          <div class="setting-row diff-row">
+            <label class="setting-item-label">
+              <input type="checkbox" class="player-field-checkbox" data-player="{{../name}}" data-type="flag" data-field="{{flagDiff.field}}" data-newval="{{flagDiff.newString}}" checked />
+              <div class="setting-info">
+                <span class="setting-name">flag: {{flagDiff.field}}</span>
+              </div>
+            </label>
+            <div class="setting-diff-grid">
+              <div class="diff-block diff-new">
+                <span class="diff-label">{{localize 'niks-copy-environment.import.newValue'}}</span>
+                <span class="diff-value">{{flagDiff.newString}}</span>
+              </div>
+              <div class="diff-block diff-old">
+                <span class="diff-label">{{localize 'niks-copy-environment.import.currentValue'}}</span>
+                <span class="diff-value">{{flagDiff.oldString}}</span>
+              </div>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        {{/each}}
+      </div>
+    </section>
+    {{/if}}
+
+    <!-- Unchanged / Skipped Information -->
+    {{#if notFoundPlayers.length}}
+    <div class="info-note">
+      <i class="fa-solid fa-user-slash" inert></i>
+      <div>
+        <strong>{{localize 'niks-copy-environment.import.notFound'}}:</strong>
+        <span>{{#each notFoundPlayers}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if notChangedPlayers.length}}
+    <div class="info-note">
+      <i class="fa-solid fa-user-check" inert></i>
+      <div>
+        <strong>{{localize 'niks-copy-environment.import.existingPlayerValues'}}:</strong>
+        <span>{{#each notChangedPlayers}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>
+      </div>
+    </div>
+    {{/if}}
+  </main>
+
+  <!-- Footer Actions -->
+  <footer class="app-footer">
+    <div></div>
+    <div class="footer-buttons">
+      <button type="button" class="button" data-action="close">
+        <i class="fa-solid fa-xmark" inert></i> {{localize 'Close'}}
+      </button>
+      <button type="button" class="button button-primary" data-action="applyImport">
+        <i class="fa-solid fa-file-import" inert></i> {{localize 'niks-copy-environment.import.save'}}
+      </button>
+    </div>
+  </footer>
+</div>

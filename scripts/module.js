@@ -1,7 +1,18 @@
-import {name} from './config.js';
+import { name } from './config.js';
 import Core from './core.js';
+import DataHelper from './data-helper.js';
+import SettingsExportApp from './apps/export-app.js';
+import SettingsImportApp from './apps/import-app.js';
 
 Hooks.once('init', function () {
+  // Expose module API
+  globalThis.NiksCopyEnvironment = {
+    Core,
+    DataHelper,
+    SettingsExportApp,
+    SettingsImportApp,
+  };
+
   game.settings.register(name, 'selected-properties', {
     scope: 'client',
     config: false,
@@ -19,19 +30,41 @@ Hooks.once('init', function () {
     config: true,
     type: Number,
     default: 500,
-    name: "niks-copy-environment.settings.max-diff",
-    hint: "niks-copy-environment.settings.max-diff-hint",
+    name: 'niks-copy-environment.settings.max-diff',
+    hint: 'niks-copy-environment.settings.max-diff-hint',
     requiresReload: false,
   });
 });
 
-Hooks.once('devModeReady', ({registerPackageDebugFlag}) => {
+Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
   registerPackageDebugFlag(name);
 });
 
+function openExportApp() {
+  new SettingsExportApp().render({ force: true });
+}
+
+function openImportFilePicker() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.addEventListener('change', async function () {
+    const file = this.files?.[0];
+    if (!file) return;
+    try {
+      const content = await foundry.utils.readTextFromFile(file);
+      const data = JSON.parse(content);
+      new SettingsImportApp(data).render({ force: true });
+    } catch (e) {
+      console.error('Copy Environment | Could not parse import file:', e);
+      ui.notifications.error(game.i18n.localize('niks-copy-environment.import.invalidFileError'));
+    }
+  });
+  input.click();
+}
+
 Hooks.on('renderSettings', function (app, html, data) {
   // In V14, the Settings sidebar is an ApplicationV2 and `html` is a native HTMLElement.
-  // Ensure we have an HTMLElement for the ContextMenu container.
   const container = html instanceof HTMLElement ? html : html[0] ?? html;
 
   // Prevent duplicate ContextMenu attachments on re-renders of the Settings tab
@@ -49,14 +82,14 @@ Hooks.on('renderSettings', function (app, html, data) {
         try {
           Core.copyAsText();
         } catch (e) {
-          console.error('Copy Environment | Error copying game settings to clipboard', e);
+          console.error('Copy Environment | Error copying to clipboard:', e);
         }
       },
       onClick: () => {
         try {
           Core.copyAsText();
         } catch (e) {
-          console.error('Copy Environment | Error copying game settings to clipboard', e);
+          console.error('Copy Environment | Error copying to clipboard:', e);
         }
       },
     },
@@ -68,14 +101,14 @@ Hooks.on('renderSettings', function (app, html, data) {
         try {
           Core.saveSummaryAsJSON();
         } catch (e) {
-          console.error('Copy Environment | Error copying game settings to JSON', e);
+          console.error('Copy Environment | Error saving summary JSON:', e);
         }
       },
       onClick: () => {
         try {
           Core.saveSummaryAsJSON();
         } catch (e) {
-          console.error('Copy Environment | Error copying game settings to JSON', e);
+          console.error('Copy Environment | Error saving summary JSON:', e);
         }
       },
     },
@@ -83,39 +116,15 @@ Hooks.on('renderSettings', function (app, html, data) {
       name: game.i18n.localize('niks-copy-environment.menu.export'),
       label: game.i18n.localize('niks-copy-environment.menu.export'),
       icon: 'fas fa-file-export',
-      callback: () => {
-        try {
-          Core.exportGameSettings();
-        } catch (e) {
-          console.error('Copy Environment | Error exporting game settings', e);
-        }
-      },
-      onClick: () => {
-        try {
-          Core.exportGameSettings();
-        } catch (e) {
-          console.error('Copy Environment | Error exporting game settings', e);
-        }
-      },
+      callback: () => openExportApp(),
+      onClick: () => openExportApp(),
     },
     {
       name: game.i18n.localize('niks-copy-environment.menu.import'),
       label: game.i18n.localize('niks-copy-environment.menu.import'),
       icon: 'fas fa-file-import',
-      callback: () => {
-        try {
-          Core.importGameSettingsQuick();
-        } catch (e) {
-          console.error('Copy Environment | Error importing game settings', e);
-        }
-      },
-      onClick: () => {
-        try {
-          Core.importGameSettingsQuick();
-        } catch (e) {
-          console.error('Copy Environment | Error importing game settings', e);
-        }
-      },
+      callback: () => openImportFilePicker(),
+      onClick: () => openImportFilePicker(),
     },
   ];
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## v14.2.0
+
+- **New Modern Export & Import Applications (ApplicationV2)**:
+  - Rebuilt the export and import workflows using Foundry V14's `ApplicationV2` architecture with `HandlebarsApplicationMixin`.
+  - **Interactive Export Dialog (`SettingsExportApp`)**:
+    - Preview all settings before exporting with live search filtering and status pills (`All`, `Active`, `Inactive`, `Orphaned`, `System/Core`, `Players`).
+    - Clear distinction between **Active** (installed & enabled), **Inactive** (installed but disabled), and **Orphaned** settings (leftover in world database from deleted/uninstalled modules).
+    - Bulk selection controls: "Select All", "Active Only", "Deselect All", and module-level toggle checkboxes.
+    - Options to include compendium folder mappings and environment metadata.
+  - **Interactive Import Dialog (`SettingsImportApp`)**:
+    - Cross-references incoming export settings against the active world's installed packages.
+    - Clear visual indicators distinguishing **Active**, **Inactive**, and **Not Installed (Missing)** modules with warning callouts.
+    - Live diff inspection comparing Current Value vs New Value with change tags.
+    - Full backward compatibility with legacy v1 flat array JSON exports and enriched v2 structured exports.
+
 ## v14.1.0
 
 - **Foundry V14 Compatibility**:
