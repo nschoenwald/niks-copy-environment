@@ -14,6 +14,8 @@
     - Clear visual indicators distinguishing **Active**, **Inactive**, and **Not Installed (Missing)** modules with warning callouts.
     - Live diff inspection comparing Current Value vs New Value with change tags.
     - Full backward compatibility with legacy v1 flat array JSON exports and enriched v2 structured exports.
+- **CI / Automation**:
+  - Added automated GitHub Actions release workflow (`.github/workflows/release.yml`) to package and attach `module.zip` and updated `module.json` assets upon publishing a GitHub release.
 
 ## v14.1.0
 

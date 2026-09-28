@@ -1,14 +1,17 @@
 # FoundryVTT - Nik's Copy Environment
 
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/League-of-Foundry-Developers/foundryvtt-forien-copy-environment) ![GitHub Releases](https://img.shields.io/github/downloads/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/latest/total) ![GitHub Releases](https://img.shields.io/github/downloads/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/total) ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fforien-copy-environment&colorB=4aa94a) ![Foundry Version](https://img.shields.io/badge/dynamic/json.svg?url=https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/releases/latest/download/module.json&label=foundry%20version&query=$.compatibleCoreVersion&colorB=blueviolet) ![Forien's Copy Environment](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FLeague-of-Foundry-Developers%2Fleague-repo-status%2Fshields-endpoint%2Fforien-copy-environment.json)
-
-
-
-**NOTE** This is an unofficial forked version of the module maintained by the League of Foundry Developers to provide module continuity while Forien is unavailable.
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/nschoenwald/niks-copy-environment) ![GitHub Releases](https://img.shields.io/github/downloads/nschoenwald/niks-copy-environment/latest/total) ![GitHub Releases](https://img.shields.io/github/downloads/nschoenwald/niks-copy-environment/total) ![Foundry Version](https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/nschoenwald/niks-copy-environment/main/module.json&label=foundry%20version&query=$.compatibility.verified&colorB=blueviolet)
 
 **[Compatibility]**: *FoundryVTT* 14+
 
 **[Systems]**: *any* (optimized for DnD5e v6+)
+
+### Installation
+
+Manifest URL:
+```
+https://github.com/nschoenwald/niks-copy-environment/releases/latest/download/module.json
+```
 
 This module allows for fast copy/save environment data such as core version or list of installed modules and their versions. Supports copying as TXT or saving as JSON.
 
