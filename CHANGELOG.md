@@ -1,35 +1,5 @@
 # Changelog
 
-## v14.2.0
-
-- **New Modern Export & Import Applications (ApplicationV2)**:
-  - Rebuilt the export and import workflows using Foundry V14's `ApplicationV2` architecture with `HandlebarsApplicationMixin`.
-  - **Interactive Export Dialog (`SettingsExportApp`)**:
-    - Preview all settings before exporting with live search filtering and status pills (`All`, `Active`, `Inactive`, `Orphaned`, `System/Core`, `Players`).
-    - Clear distinction between **Active** (installed & enabled), **Inactive** (installed but disabled), and **Orphaned** settings (leftover in world database from deleted/uninstalled modules).
-    - Bulk selection controls: "Select All", "Active Only", "Deselect All", and module-level toggle checkboxes.
-    - Options to include compendium folder mappings and environment metadata.
-  - **Interactive Import Dialog (`SettingsImportApp`)**:
-    - Cross-references incoming export settings against the active world's installed packages.
-    - Clear visual indicators distinguishing **Active**, **Inactive**, and **Not Installed (Missing)** modules with warning callouts.
-    - Live diff inspection comparing Current Value vs New Value with change tags.
-    - Full backward compatibility with legacy v1 flat array JSON exports and enriched v2 structured exports.
-
-## v14.1.0
-
-- **Foundry V14 Compatibility**:
-  - Updated ContextMenu integration to support V14 standards (`label`, `onClick`, and explicitly passing `{ jQuery: false }`).
-  - Added a guard to prevent duplicate ContextMenu listener registration when the Settings sidebar tab re-renders.
-  - Replaced deprecated top-level `SocketInterface` usage with `foundry.helpers.SocketInterface`.
-  - Filtered out deprecated V14 core settings (`core.gridTemplates`, `core.coneTemplateType`) from settings export.
-  - Safely handle package manifest authors as a `Set` in V14 without relying on legacy `authors.length` or `author`.
-- **DnD5e v6 Compatibility**:
-  - Added `dnd5e.systemMigrationVersion` and `dnd5e.firstRun` to default unselected properties on import to safeguard target worlds from premature migration skipping or disrupted first-run setup.
-- **Bug Fixes & Refinements**:
-  - Fixed a bug where modern `Color` objects on User documents were strictly compared against hex strings, causing player colors to always falsely show as changed.
-  - Fixed a crash during Compendium Folder structure import when `core.compendiumConfiguration` had not yet been modified in the target world database.
-  - Normalized manifest paths in `module.json` and corrected `library` package flag to `false`.
-
 ## v2.2.4
 
 - Added Polish translation by Lioheart.
