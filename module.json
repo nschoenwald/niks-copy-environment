@@ -21,52 +21,52 @@
   "url": "https://github.com/nschoenwald/niks-copy-environment",
   "bugs": "https://github.com/nschoenwald/niks-copy-environment/issues",
   "changelog": "https://github.com/nschoenwald/niks-copy-environment/blob/master/changelog.md",
-  "version": "4.0.0",
+  "version": "14.1.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14"
   },
   "esmodules": [
-    "/scripts/module.js"
+    "scripts/module.js"
   ],
   "styles": [
-    "/styles/module.css"
+    "styles/module.css"
   ],
   "languages": [
     {
       "lang": "en",
       "name": "English",
-      "path": "languages/en.json"
+      "path": "lang/en.json"
     },
     {
       "lang": "ja",
       "name": "日本語",
-      "path": "languages/ja.json"
+      "path": "lang/ja.json"
     },
     {
       "lang": "de",
       "name": "Deutsch",
-      "path": "languages/de.json"
+      "path": "lang/de.json"
     },
     {
       "lang": "pt",
       "name": "Português",
-      "path": "languages/pt.json"
+      "path": "lang/pt.json"
     },
     {
       "lang": "pl",
       "name": "Polski",
-      "path": "languages/pl.json"
+      "path": "lang/pl.json"
     },
     {
       "lang": "it",
       "name": "Italiano",
-      "path": "languages/it.json"
+      "path": "lang/it.json"
     },
     {
       "lang": "fr",
       "name": "Français",
-      "path": "languages/fr.json"
+      "path": "lang/fr.json"
     }
   ],
   "packs": [],
@@ -75,5 +75,5 @@
   "download": "https://github.com/nschoenwald/niks-copy-environment/releases/latest/download/module.zip",
   "protected": false,
   "coreTranslation": false,
-  "library": true
+  "library": false
 }

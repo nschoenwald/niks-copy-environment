@@ -94,8 +94,8 @@ export class WorldSetting {
       if (newValue) {
         newValue = JSON.parse(newValue);
       }
-      if (typeof existingSetting === 'object' && typeof newValue === 'object') {
-        let diff = foundry.utils.diffObject(existingSetting, newValue);
+      if (existingSetting && typeof existingSetting === 'object' && newValue && typeof newValue === 'object') {
+        let diff = foundry.utils.diffObject(existingSetting, newValue, { bidirectional: true });
         if (foundry.utils.isEmpty(diff)) {
           // No difference in the underlying object.
           return new Difference(this.key, null, null);
@@ -112,7 +112,8 @@ export class WorldSetting {
     }
 
     // Return the difference of the original values, not the parsed values.
-    let existingSettings = game.data.settings.find((s) => s.key === this.key);
+    let existingSettings = game.settings?.storage?.get('world')?.getSetting(this.key)
+      ?? game.data?.settings?.find((s) => s.key === this.key);
     return new Difference(this.key, existingSettings?.value, this.value);
   }
 }
@@ -143,11 +144,21 @@ export class PlayerSetting {
 
     const userData = existingUser;
 
-    if (setting.core.color !== userData.color) {
+    const normalizeColor = (c) => {
+      try {
+        return c ? (foundry.utils.Color?.from(c)?.css ?? c) : c;
+      } catch {
+        return c?.css ?? c;
+      }
+    };
+    const userColor = normalizeColor(userData.color);
+    const settingColor = normalizeColor(setting.core?.color);
+
+    if (userColor !== settingColor) {
       this.playerDifferences.color = new Difference(
         'color',
-        userData.color,
-        setting.core.color
+        userColor,
+        settingColor
       );
     }
 

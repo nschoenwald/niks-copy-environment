@@ -8,16 +8,11 @@
 
 **[Compatibility]**: *FoundryVTT* 14+
 
-**[Systems]**: *any*
+**[Systems]**: *any* (optimized for DnD5e v6+)
 
 This module allows for fast copy/save environment data such as core version or list of installed modules and their versions. Supports copying as TXT or saving as JSON.
 
 Module also allows to export (save/backup) current game settings and then import (restore) them. Non-GM users can only import client-side settings.
-
-## Installation
-
-1. Install Nik's Copy Environment using manifest URL: https://raw.githubusercontent.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/master/module.json
-2. While loaded in World, enable **_Nik's Copy Environment_** module.
 
 ### Usage
 
@@ -65,8 +60,24 @@ module.json
 
 If you wish to support module development, please consider [becoming Patron](https://www.patreon.com/foundryworkshop) or donating [through Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6P2RRX7HVEMV2&source=url). Thanks!
 
-## License
+---
 
-Nik's Copy Environment is a module for Foundry VTT, originally by Forien, and is licensed under a [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0/).
+## Other Modules by Nik
 
-This work is licensed under Foundry Virtual Tabletop [EULA - Limited License Agreement for module development from May 29, 2020](https://foundryvtt.com/article/license/).
+### 🎲 D&D 5e Specific
+* **[Nik's DnD5e Tweaks](https://github.com/nschoenwald/niks-dnd5e-tweaks)** – Consolidated collection of quality-of-life enhancements and combat automation tweaks for DnD5e.
+
+### ⚔️ Combat & Token Tools
+* **[Nik's Token Tags](https://github.com/nschoenwald/niks-token-tags)** – Automatically numbers duplicate combatant NPCs (A, B, C…) with color-coded letter overlays.
+* **[Nik's Shared NPC Initiative](https://github.com/nschoenwald/niks-shared-npc-initiative)** – Groups NPCs of the same type in combat so they share a single initiative roll.
+* **[Nik's Movement Control](https://github.com/nschoenwald/niks-movement-control)** – GM controls to toggle player movement and automatically restrict/allow movement on combat start and end.
+* **[Nik's Tiny Change Logs](https://github.com/nschoenwald/niks-tiny-changelogs)** – Compact, single-line chat messages logging token HP and Temp HP changes.
+
+### 🎲 Visuals & Display
+* **[Nik's Dynamic Roll Area](https://github.com/nschoenwald/niks-dynamic-roll-area)** – Dynamically restricts Dice So Nice 3D dice rolling area to exclude the sidebar / chat log across all screen resolutions and window sizes.
+
+### ⚙️ Utilities & System Management
+* **[Nik's Settings Locks](https://github.com/nschoenwald/niks-settings-locks)** – Soft-lock and hard-lock client settings and keybindings across all connected players.
+* **[Nik's Compendium Search Tweaks](https://github.com/nschoenwald/niks-compendium-search-tweaks)** – Configure which compendium packs are included or excluded from native sidebar search.
+* **[Nik's Show & Tell](https://github.com/nschoenwald/niks-show-and-tell)** – Share popout images to chat and paste image files directly into chat messages.
+* **[Nik's Zoom / Pan Options](https://github.com/nschoenwald/niks-zoom-pan-options)** – Touchpad and scroll wheel pan/zoom controls and canvas navigation enhancements.

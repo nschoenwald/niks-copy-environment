@@ -19,6 +19,8 @@ export default class Core extends foundry.appv1.api.FormApplication {
     this.selectedProperties = game.settings.get(name, 'selected-properties') || {
       'core.time': false,
       'pf2e.worldClock.worldCreatedOn': false,
+      'dnd5e.systemMigrationVersion': false,
+      'dnd5e.firstRun': false,
     };
     this.supportingData = {};
 
@@ -352,28 +354,32 @@ export default class Core extends foundry.appv1.api.FormApplication {
   }
 
   static getText() {
-    const system = game.data.system;
+    const system = game.system ?? game.data?.system;
     const core = game.version;
 
     let text = `Core Version: ${core}\n\n`;
 
-    const systemAuthors = system.authors.length ? system.authors.map(a => {
-      if (typeof a === 'string') {
-        return a;
-      }
-      return a.name;
-    }) : [system.author];
-    text += `System: ${(system.id ?? system.name)} ${system.version} (${Array.from(new Set(systemAuthors)).join(', ')}) \n\n`;
+    const systemAuthors = Array.from(system?.authors ?? []).map(a => {
+      if (typeof a === 'string') return a;
+      return a?.name ?? a;
+    }).filter(Boolean);
+    if (!systemAuthors.length && system?.author) {
+      systemAuthors.push(system.author);
+    }
+    const authorsStr = systemAuthors.length ? ` (${Array.from(new Set(systemAuthors)).join(', ')})` : '';
+    text += `System: ${(system?.id ?? system?.name ?? 'Unknown')} ${system?.version ?? ''}${authorsStr} \n\n`;
 
     text += `Modules: \n`;
     Core.getModulesForExport().forEach((m) => {
-      const moduleAuthors = m.authors.length ? m.authors.map(a => {
-        if (typeof a === 'string') {
-          return a;
-        }
-        return a.name;
-      }) : [m.author];
-      text += `${(m.id ?? m.name)} ${m.version} (${Array.from(new Set(moduleAuthors)).join(', ')})\n`;
+      const moduleAuthors = Array.from(m.authors ?? []).map(a => {
+        if (typeof a === 'string') return a;
+        return a?.name ?? a;
+      }).filter(Boolean);
+      if (!moduleAuthors.length && m.author) {
+        moduleAuthors.push(m.author);
+      }
+      const modAuthorsStr = moduleAuthors.length ? ` (${Array.from(new Set(moduleAuthors)).join(', ')})` : '';
+      text += `${(m.id ?? m.name)} ${m.version}${modAuthorsStr}\n`;
     });
 
     text += `\n${game.i18n.localize('niks-copy-environment.message')}`;
@@ -407,31 +413,33 @@ export default class Core extends foundry.appv1.api.FormApplication {
   }
 
   static saveSummaryAsJSON() {
-    const system = game.data.system;
-    const systemAuthors = system.authors.length ? system.authors.map(a => {
-      if (typeof a === 'string') {
-        return a;
-      }
-      return a.name;
-    }) : [system.author];
+    const system = game.system ?? game.data?.system;
+    const systemAuthors = Array.from(system?.authors ?? []).map(a => {
+      if (typeof a === 'string') return a;
+      return a?.name ?? a;
+    }).filter(Boolean);
+    if (!systemAuthors.length && system?.author) {
+      systemAuthors.push(system.author);
+    }
 
     const data = {};
     data.core = {
       version: game.version,
     };
     data.system = {
-      id: system.id,
-      version: system.version,
+      id: system?.id ?? system?.name,
+      version: system?.version,
       author: Array.from(new Set(systemAuthors)).join(', '),
-      manifest: system.manifest,
+      manifest: system?.manifest,
     };
     data.modules = Core.getModulesForExport().map((m) => {
-      const moduleAuthors = m.authors.length ? m.authors.map(a => {
-        if (typeof a === 'string') {
-          return a;
-        }
-        return a.name;
-      }) : [m.author];
+      const moduleAuthors = Array.from(m.authors ?? []).map(a => {
+        if (typeof a === 'string') return a;
+        return a?.name ?? a;
+      }).filter(Boolean);
+      if (!moduleAuthors.length && m.author) {
+        moduleAuthors.push(m.author);
+      }
       return {
         id: m.id || m.name,
         version: m.version,
@@ -443,20 +451,29 @@ export default class Core extends foundry.appv1.api.FormApplication {
     this.download(data, Core.getFilename('foundry-environment'));
   }
 
-  static exportGameSettings() {
-    const excludeModules = game.data.modules.filter((m) => m.flags?.noCopyEnvironmentSettings || m.data?.flags?.noCopyEnvironmentSettings).map((m) => m.id) || [];
+    const excludeModules = game.modules
+      ? game.modules.filter((m) => m.flags?.noCopyEnvironmentSettings).map((m) => m.id)
+      : (game.data?.modules?.filter((m) => m.flags?.noCopyEnvironmentSettings || m.data?.flags?.noCopyEnvironmentSettings).map((m) => m.id) || []);
+
+    const deprecatedSettings = new Set([
+      'core.gridTemplates',
+      'core.coneTemplateType',
+    ]);
 
     // Return an array with both the world settings and player settings along with their support data.
     let data = Array.prototype.concat(
       Array.from(game.settings.settings)
         .filter(([k, v]) => {
+          if (deprecatedSettings.has(k) || excludeModules.some((e) => v.namespace === e)) {
+            return false;
+          }
           try {
             const value = game.settings.get(v.namespace, v.key);
             let sameValue = value === v.default;
             if (value && typeof value === 'object' && v.default && typeof v.default === 'object') {
               sameValue = !Object.keys(foundry.utils.diffObject(v.default, value)).length && !Object.keys(foundry.utils.diffObject(value, v.default)).length;
             }
-            return !sameValue && !excludeModules.some((e) => v.namespace === e);
+            return !sameValue;
           } catch (e) {
             console.error(`Copy Environment | Could not export settings for ${v.namespace}.${v.key} due to an error. Please report this as an issue on GitHub.`, e);
             return false;
@@ -543,7 +560,8 @@ export default class Core extends foundry.appv1.api.FormApplication {
           storage.setItem(data.key, data.value);
         }
       } else if (game.user.isGM) {
-        const existing = game.data.settings.find((s) => s.key === data.key);
+        const existing = game.settings?.storage?.get('world')?.getSetting(data.key)
+          ?? game.data?.settings?.find((s) => s.key === data.key);
 
         if (data.key === 'core.compendiumConfiguration') {
           // The Compendium Configuration setting maps compendiums to folders, and the FolderIDs
@@ -551,8 +569,13 @@ export default class Core extends foundry.appv1.api.FormApplication {
           // Attempt to update the IDs to match the new world, but if that fails, just use the
           // existing value.
           try {
-            const existingCompendiumMap = JSON.parse(existing.value);
-            const newCompendiumMap = JSON.parse(data.value);
+            let existingVal = existing?.value;
+            if (!existingVal) {
+              const currentSetting = game.settings.get('core', 'compendiumConfiguration');
+              existingVal = currentSetting ? JSON.stringify(currentSetting) : '{}';
+            }
+            const existingCompendiumMap = typeof existingVal === 'string' ? JSON.parse(existingVal) : (existingVal || {});
+            const newCompendiumMap = typeof data.value === 'string' ? JSON.parse(data.value) : (data.value || {});
             const missingEntries = new Map();
 
             // Replace IDs in the new map with the existing IDs if they exist.
@@ -593,9 +616,10 @@ export default class Core extends foundry.appv1.api.FormApplication {
       }
     }
     try {
+      const socket = foundry.helpers?.SocketInterface ?? globalThis.SocketInterface;
       if (updates.length) {
         log(true, `Updating ${updates.length} world settings.`, updates);
-        await SocketInterface.dispatch('modifyDocument', {
+        await socket.dispatch('modifyDocument', {
           type: 'Setting',
           action: 'update',
           updates: updates,
@@ -608,7 +632,7 @@ export default class Core extends foundry.appv1.api.FormApplication {
       }
       if (creates.length) {
         log(true, `Creating ${creates.length} world settings.`, creates);
-        await SocketInterface.dispatch('modifyDocument', {
+        await socket.dispatch('modifyDocument', {
           type: 'Setting',
           action: 'create',
           data: creates,

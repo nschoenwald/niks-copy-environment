@@ -9,6 +9,8 @@ Hooks.once('init', function () {
     default: {
       'core.time': false,
       'pf2e.worldClock.worldCreatedOn': false,
+      'dnd5e.systemMigrationVersion': false,
+      'dnd5e.firstRun': false,
     },
   });
 
@@ -32,11 +34,25 @@ Hooks.on('renderSettings', function (app, html, data) {
   // Ensure we have an HTMLElement for the ContextMenu container.
   const container = html instanceof HTMLElement ? html : html[0] ?? html;
 
-  new foundry.applications.ux.ContextMenu.implementation(container, 'section.info, section.general-information, [data-setting-id]', [
+  // Prevent duplicate ContextMenu attachments on re-renders of the Settings tab
+  if (container._copyEnvironmentContextMenu) return;
+  container._copyEnvironmentContextMenu = true;
+
+  const ContextMenuCls = foundry.applications?.ux?.ContextMenu?.implementation ?? globalThis.ContextMenu;
+
+  const menuItems = [
     {
       name: game.i18n.localize('niks-copy-environment.menu.copy'),
+      label: game.i18n.localize('niks-copy-environment.menu.copy'),
       icon: 'far fa-copy',
       callback: () => {
+        try {
+          Core.copyAsText();
+        } catch (e) {
+          console.error('Copy Environment | Error copying game settings to clipboard', e);
+        }
+      },
+      onClick: () => {
         try {
           Core.copyAsText();
         } catch (e) {
@@ -46,8 +62,16 @@ Hooks.on('renderSettings', function (app, html, data) {
     },
     {
       name: game.i18n.localize('niks-copy-environment.menu.save'),
+      label: game.i18n.localize('niks-copy-environment.menu.save'),
       icon: 'fas fa-copy',
       callback: () => {
+        try {
+          Core.saveSummaryAsJSON();
+        } catch (e) {
+          console.error('Copy Environment | Error copying game settings to JSON', e);
+        }
+      },
+      onClick: () => {
         try {
           Core.saveSummaryAsJSON();
         } catch (e) {
@@ -57,8 +81,16 @@ Hooks.on('renderSettings', function (app, html, data) {
     },
     {
       name: game.i18n.localize('niks-copy-environment.menu.export'),
+      label: game.i18n.localize('niks-copy-environment.menu.export'),
       icon: 'fas fa-file-export',
       callback: () => {
+        try {
+          Core.exportGameSettings();
+        } catch (e) {
+          console.error('Copy Environment | Error exporting game settings', e);
+        }
+      },
+      onClick: () => {
         try {
           Core.exportGameSettings();
         } catch (e) {
@@ -68,6 +100,7 @@ Hooks.on('renderSettings', function (app, html, data) {
     },
     {
       name: game.i18n.localize('niks-copy-environment.menu.import'),
+      label: game.i18n.localize('niks-copy-environment.menu.import'),
       icon: 'fas fa-file-import',
       callback: () => {
         try {
@@ -76,6 +109,17 @@ Hooks.on('renderSettings', function (app, html, data) {
           console.error('Copy Environment | Error importing game settings', e);
         }
       },
+      onClick: () => {
+        try {
+          Core.importGameSettingsQuick();
+        } catch (e) {
+          console.error('Copy Environment | Error importing game settings', e);
+        }
+      },
     },
-  ]);
+  ];
+
+  new ContextMenuCls(container, 'section.info, section.general-information, [data-setting-id]', menuItems, {
+    jQuery: false,
+  });
 });
