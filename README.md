@@ -35,6 +35,7 @@ Go to Settings tab in Sidebar and **right click** on data **below** "General Inf
   - Live diff view comparing current world settings against the import file.
   - Classifies modules by target world state: **Active**, **Inactive**, or **Not Installed (Missing)** with safety alerts.
   - Granular selection of world settings, client settings, and individual player configurations.
+  - Strictly scoped modern UI styling ensuring zero CSS interference with core sheets or system actors (e.g. DnD5e character sheets).
 
 ## Info for Module Developers
 

@@ -451,6 +451,7 @@ export default class Core extends foundry.appv1.api.FormApplication {
     this.download(data, Core.getFilename('foundry-environment'));
   }
 
+  static exportGameSettings() {
     const excludeModules = game.modules
       ? game.modules.filter((m) => m.flags?.noCopyEnvironmentSettings).map((m) => m.id)
       : (game.data?.modules?.filter((m) => m.flags?.noCopyEnvironmentSettings || m.data?.flags?.noCopyEnvironmentSettings).map((m) => m.id) || []);

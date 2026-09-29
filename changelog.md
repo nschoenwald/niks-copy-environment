@@ -1,5 +1,13 @@
 # Changelog
 
+## v14.2.1
+
+- **CSS Spill Fix**:
+  - Strictly scoped all styles in `styles/module.css` to `.niks-copy-environment-app` using native CSS nesting and restored scoped styles for legacy `#niks-copy-environment-settings`.
+  - Resolves style collisions where unscoped utility classes (such as `.badge`, `.tag`, `.button-primary`, `.status-icon`, `.search-bar`, etc.) affected core Foundry applications and system sheets—including the level badge on the DnD 5e player character sheet.
+- **Syntax Error Fix**:
+  - Restored the missing `static exportGameSettings()` method declaration in `scripts/core.js`, fixing the `Uncaught SyntaxError: Unexpected identifier 'excludeModules'`.
+
 ## v14.2.0
 
 - **New Modern Export & Import Applications (ApplicationV2)**:
