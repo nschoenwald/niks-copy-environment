@@ -7,22 +7,22 @@
     </div>
 
     <div class="filter-pills">
-      <button type="button" class="filter-pill active" data-action="filterStatus" data-filter="all">
+      <button type="button" class="filter-pill {{#if (eq currentFilter 'all')}}active{{/if}}" data-action="filterStatus" data-filter="all">
         {{localize 'niks-copy-environment.filters.all'}} <span class="pill-count">{{counts.total}}</span>
       </button>
-      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="active">
+      <button type="button" class="filter-pill {{#if (eq currentFilter 'active')}}active{{/if}}" data-action="filterStatus" data-filter="active">
         <i class="fa-solid fa-circle-check status-icon active" inert></i> {{localize 'niks-copy-environment.badges.active'}} <span class="pill-count">{{counts.active}}</span>
       </button>
-      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="inactive">
+      <button type="button" class="filter-pill {{#if (eq currentFilter 'inactive')}}active{{/if}}" data-action="filterStatus" data-filter="inactive">
         <i class="fa-solid fa-circle-pause status-icon inactive" inert></i> {{localize 'niks-copy-environment.badges.inactive'}} <span class="pill-count">{{counts.inactive}}</span>
       </button>
-      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="orphaned">
+      <button type="button" class="filter-pill {{#if (eq currentFilter 'orphaned')}}active{{/if}}" data-action="filterStatus" data-filter="orphaned">
         <i class="fa-solid fa-triangle-exclamation status-icon orphaned" inert></i> {{localize 'niks-copy-environment.badges.orphaned'}} <span class="pill-count">{{counts.orphaned}}</span>
       </button>
-      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="system">
+      <button type="button" class="filter-pill {{#if (eq currentFilter 'system')}}active{{/if}}" data-action="filterStatus" data-filter="system">
         <i class="fa-solid fa-gear status-icon system" inert></i> {{localize 'niks-copy-environment.badges.system'}} <span class="pill-count">{{counts.system}}</span>
       </button>
-      <button type="button" class="filter-pill" data-action="filterStatus" data-filter="players">
+      <button type="button" class="filter-pill {{#if (eq currentFilter 'players')}}active{{/if}}" data-action="filterStatus" data-filter="players">
         <i class="fa-solid fa-users status-icon player" inert></i> {{localize 'niks-copy-environment.badges.players'}} <span class="pill-count">{{players.length}}</span>
       </button>
     </div>
@@ -50,7 +50,7 @@
     <section class="module-card" data-type="{{group.type}}" data-id="{{group.id}}" data-title="{{group.title}}">
       <div class="module-header">
         <label class="group-select-label">
-          <input type="checkbox" class="group-toggle" data-action="toggleGroup" {{#if (ne group.type 'inactive')}}checked{{/if}} />
+          <input type="checkbox" class="group-toggle" data-action="toggleGroup" />
         </label>
         <button type="button" class="collapse-toggle" data-action="toggleAccordion">
           <i class="fa-solid fa-chevron-down" inert></i>
@@ -66,11 +66,11 @@
           {{else if (eq group.type 'system')}}
             <span class="badge badge-system"><i class="fa-solid fa-shield-halved" inert></i> System</span>
           {{else if (eq group.type 'active')}}
-            <span class="badge badge-active"><i class="fa-solid fa-circle-check" inert></i> Active</span>
+            <span class="badge badge-active"><i class="fa-solid fa-circle-check" inert></i> {{localize 'niks-copy-environment.badges.active'}}</span>
           {{else if (eq group.type 'inactive')}}
-            <span class="badge badge-inactive"><i class="fa-solid fa-circle-pause" inert></i> Inactive</span>
+            <span class="badge badge-inactive"><i class="fa-solid fa-circle-pause" inert></i> {{localize 'niks-copy-environment.badges.inactive'}}</span>
           {{else if (eq group.type 'orphaned')}}
-            <span class="badge badge-orphaned"><i class="fa-solid fa-triangle-exclamation" inert></i> Orphaned</span>
+            <span class="badge badge-orphaned"><i class="fa-solid fa-triangle-exclamation" inert></i> {{localize 'niks-copy-environment.badges.orphaned'}}</span>
           {{/if}}
           <span class="badge badge-count">{{group.settings.length}}</span>
         </div>
@@ -105,7 +105,7 @@
     <section class="players-card" data-type="players">
       <div class="module-header">
         <label class="group-select-label">
-          <input type="checkbox" class="group-toggle" data-action="toggleGroup" checked />
+          <input type="checkbox" class="group-toggle" data-action="toggleGroup" />
         </label>
         <button type="button" class="collapse-toggle" data-action="toggleAccordion">
           <i class="fa-solid fa-chevron-down" inert></i>
@@ -141,7 +141,7 @@
     <div class="footer-options">
       {{#if compendiumFoldersCount}}
       <label class="footer-checkbox-label">
-        <input type="checkbox" id="include-compendium-folders" checked />
+        <input type="checkbox" class="include-compendium-folders" checked />
         <span>{{localize 'niks-copy-environment.export.includeCompendiumFolders'}} ({{compendiumFoldersCount}})</span>
       </label>
       {{/if}}

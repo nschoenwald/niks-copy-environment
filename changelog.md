@@ -1,5 +1,25 @@
 # Changelog
 
+## v14.3.0
+
+- **Import fixes**:
+  - Fixed imported player permissions and flags being saved cut off (with a trailing "...") when they were longer than the "Number of characters" display limit.
+  - Fixed per-user settings being imported as world-wide settings. They are now applied to the user who runs the import.
+  - Fixed import files with a player entry that has no core data failing to open.
+  - Settings that only differ in key order are no longer shown as changed, and settings of uninstalled modules are now compared against the value stored in the world.
+  - Player avatars from the export file are now compared and can be imported.
+  - Non-GM users no longer get an error when an import file contains player changes; those changes are skipped.
+  - The "Changed" filter now hides unchanged settings inside a module, not just modules without changes.
+- **Export / Import dialog fixes**:
+  - The selection counter and the module checkboxes now update when you tick individual settings (module checkboxes also show a partial state).
+  - "Deselect All" no longer unticks the "Include Compendium Folder Mappings" option.
+  - Opening the dialog a second time now replaces the old window instead of leaving a broken copy behind.
+  - Status badges are now translated.
+- **Other**:
+  - "Copy as text" uses Foundry's clipboard helper and only shows the success message when copying worked.
+  - Removed the old, unused import form and its leftover translations, and the duplicate `languages` folder.
+  - Faster opening of the export and import dialogs in worlds with many settings.
+
 ## v14.2.1
 
 - **CSS Spill Fix**:

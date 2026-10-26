@@ -1,5 +1,5 @@
 import { name as moduleName, log } from './config.js';
-import Setting, { WorldSetting, PlayerSetting, Difference } from './setting.js';
+import { WorldSetting, PlayerSetting, getMaxDiffLength, normalizeColor } from './setting.js';
 
 export const MODULE_STATUS = Object.freeze({
   ACTIVE: 'active',
@@ -9,6 +9,42 @@ export const MODULE_STATUS = Object.freeze({
   CORE: 'core',
   SYSTEM: 'system',
 });
+
+/**
+ * Marker type for the supporting data entry of legacy (v1) flat array exports.
+ * @type {string}
+ */
+export const SUPPORTING_DATA_TYPE = '_supportingDataType';
+
+const GROUP_ORDER = {
+  [MODULE_STATUS.CORE]: 1,
+  [MODULE_STATUS.SYSTEM]: 2,
+  [MODULE_STATUS.ACTIVE]: 3,
+  [MODULE_STATUS.INACTIVE]: 4,
+  [MODULE_STATUS.ORPHANED]: 5,
+  [MODULE_STATUS.MISSING]: 5,
+};
+
+/**
+ * Sort comparator for setting groups: Core, System, Active, Inactive, Orphaned/Missing, then by title.
+ */
+function compareGroups(a, b) {
+  const diff = (GROUP_ORDER[a.type] || 99) - (GROUP_ORDER[b.type] || 99);
+  if (diff !== 0) return diff;
+  return a.title.localeCompare(b.title);
+}
+
+/**
+ * Format the authors of a package as a comma separated string.
+ * @param {object} pkg  A system or module package
+ * @returns {string}
+ */
+export function formatAuthors(pkg) {
+  const authors = Array.from(pkg?.authors ?? [])
+    .map((a) => (typeof a === 'string' ? a : a?.name))
+    .filter(Boolean);
+  return Array.from(new Set(authors)).join(', ');
+}
 
 export default class DataHelper {
   static DEPRECATED_SETTINGS = new Set([
@@ -24,51 +60,48 @@ export default class DataHelper {
   ]);
 
   /**
+   * Describe the package that owns a setting namespace.
+   * @param {string} namespace
+   * @param {string} unknownType   Status used when no installed package matches the namespace
+   * @param {string} unknownTitle  Title used when no installed package matches the namespace
+   * @returns {{id: string, title: string, version: string, type: string, optOut: boolean}}
+   */
+  static describeNamespace(namespace, unknownType, unknownTitle) {
+    if (namespace === 'core') {
+      return { id: namespace, title: 'Foundry Virtual Tabletop Core', version: game.version, type: MODULE_STATUS.CORE, optOut: false };
+    }
+    if (namespace === game.system.id) {
+      return { id: namespace, title: game.system.title || namespace, version: game.system.version || '', type: MODULE_STATUS.SYSTEM, optOut: false };
+    }
+    const mod = game.modules.get(namespace);
+    if (mod) {
+      return {
+        id: namespace,
+        title: mod.title || namespace,
+        version: mod.version || '',
+        type: mod.active ? MODULE_STATUS.ACTIVE : MODULE_STATUS.INACTIVE,
+        optOut: Boolean(mod.flags?.noCopyEnvironmentSettings),
+      };
+    }
+    return { id: namespace, title: unknownTitle, version: '', type: unknownType, optOut: false };
+  }
+
+  /**
    * Scans current world and client environment to prepare groups for the Exporter app.
    */
   static scanExportData() {
     const worldStorage = game.settings.storage.get('world');
-    const systemId = game.system.id;
     const groups = new Map();
 
     const getOrCreateGroup = (namespace) => {
-      if (groups.has(namespace)) return groups.get(namespace);
-
-      let type = MODULE_STATUS.ORPHANED;
-      let title = namespace;
-      let version = '';
-      let optOut = false;
-
-      if (namespace === 'core') {
-        type = MODULE_STATUS.CORE;
-        title = 'Foundry Virtual Tabletop Core';
-        version = game.version;
-      } else if (namespace === systemId) {
-        type = MODULE_STATUS.SYSTEM;
-        title = game.system.title || namespace;
-        version = game.system.version || '';
-      } else {
-        const mod = game.modules.get(namespace);
-        if (mod) {
-          type = mod.active ? MODULE_STATUS.ACTIVE : MODULE_STATUS.INACTIVE;
-          title = mod.title || namespace;
-          version = mod.version || '';
-          optOut = Boolean(mod.flags?.noCopyEnvironmentSettings);
-        } else {
-          type = MODULE_STATUS.ORPHANED;
-          title = `${namespace} (uninstalled)`;
-        }
+      let group = groups.get(namespace);
+      if (!group) {
+        group = {
+          ...this.describeNamespace(namespace, MODULE_STATUS.ORPHANED, `${namespace} (uninstalled)`),
+          settings: [],
+        };
+        groups.set(namespace, group);
       }
-
-      const group = {
-        id: namespace,
-        title,
-        version,
-        type,
-        optOut,
-        settings: [],
-      };
-      groups.set(namespace, group);
       return group;
     };
 
@@ -76,8 +109,7 @@ export default class DataHelper {
     for (const [key, config] of game.settings.settings.entries()) {
       if (this.DEPRECATED_SETTINGS.has(key)) continue;
 
-      const namespace = config.namespace;
-      const group = getOrCreateGroup(namespace);
+      const group = getOrCreateGroup(config.namespace);
       if (group.optOut) continue;
 
       let value;
@@ -89,100 +121,62 @@ export default class DataHelper {
       }
 
       let isDefault = value === config.default;
-      if (value && typeof value === 'object' && config.default && typeof config.default === 'object') {
-        const diff1 = foundry.utils.diffObject(config.default, value);
-        const diff2 = foundry.utils.diffObject(value, config.default);
-        isDefault = foundry.utils.isEmpty(diff1) && foundry.utils.isEmpty(diff2);
+      if (!isDefault && value && typeof value === 'object' && config.default && typeof config.default === 'object') {
+        try {
+          isDefault = foundry.utils.equals(JSON.parse(JSON.stringify(value)), JSON.parse(JSON.stringify(config.default)));
+        } catch {
+          isDefault = false;
+        }
       }
-
-      const defaultSelected = !this.DEFAULT_UNCHECKED_SETTINGS.has(key) && (group.type !== MODULE_STATUS.INACTIVE);
 
       group.settings.push({
         key,
         name: config.name ? game.i18n.localize(config.name) : config.key,
         hint: config.hint ? game.i18n.localize(config.hint) : '',
         scope: config.scope,
-        value,
-        serializedValue: JSON.stringify(value),
         isDefault,
-        defaultSelected,
+        defaultSelected: !this.DEFAULT_UNCHECKED_SETTINGS.has(key) && (group.type !== MODULE_STATUS.INACTIVE),
       });
     }
 
-    // 2. Scan world storage for orphaned settings that aren't currently registered in game.settings.settings
+    // 2. Scan world storage for orphaned world settings that aren't registered in game.settings.settings.
+    // User-scoped Setting documents of every user also live in this collection, so skip those.
     if (worldStorage) {
+      const seen = new Set();
       for (const settingDoc of worldStorage) {
-        if (!settingDoc.key || this.DEPRECATED_SETTINGS.has(settingDoc.key)) continue;
-        const [namespace] = settingDoc.key.split('.');
+        const key = settingDoc.key;
+        if (!key || settingDoc.user || seen.has(key)) continue;
+        if (game.settings.settings.has(key) || this.DEPRECATED_SETTINGS.has(key)) continue;
+        seen.add(key);
+
+        const [namespace] = key.split('.');
         const group = getOrCreateGroup(namespace);
         if (group.optOut) continue;
 
-        // Check if already included from registered settings
-        if (group.settings.some((s) => s.key === settingDoc.key)) continue;
-
-        let parsedVal;
-        try {
-          parsedVal = JSON.parse(settingDoc.value);
-        } catch {
-          parsedVal = settingDoc.value;
-        }
-
         group.settings.push({
-          key: settingDoc.key,
-          name: settingDoc.key,
+          key,
+          name: key,
           hint: game.i18n.localize('niks-copy-environment.export.orphanedHint'),
           scope: 'world',
-          value: parsedVal,
-          serializedValue: settingDoc.value,
           isDefault: false,
           defaultSelected: false,
         });
       }
     }
 
-    // Sort settings within each group
-    for (const group of groups.values()) {
+    const sortedGroups = Array.from(groups.values()).filter((g) => g.settings.length > 0);
+    for (const group of sortedGroups) {
       group.settings.sort((a, b) => a.key.localeCompare(b.key));
     }
+    sortedGroups.sort(compareGroups);
 
-    // Sort groups: Core first, then System, then Active, Inactive, Orphaned
-    const order = {
-      [MODULE_STATUS.CORE]: 1,
-      [MODULE_STATUS.SYSTEM]: 2,
-      [MODULE_STATUS.ACTIVE]: 3,
-      [MODULE_STATUS.INACTIVE]: 4,
-      [MODULE_STATUS.ORPHANED]: 5,
-    };
-
-    const sortedGroups = Array.from(groups.values())
-      .filter((g) => g.settings.length > 0)
-      .sort((a, b) => {
-        const diff = (order[a.type] || 99) - (order[b.type] || 99);
-        if (diff !== 0) return diff;
-        return a.title.localeCompare(b.title);
-      });
-
-    // Players list
-    const players = game.users.map((u) => {
-      const normalizeColor = (c) => {
-        try {
-          return c ? (foundry.utils.Color?.from(c)?.css ?? c) : c;
-        } catch {
-          return c?.css ?? c;
-        }
-      };
-      return {
-        id: u.id,
-        name: u.name,
-        role: u.role,
-        roleName: Object.entries(CONST.USER_ROLES).find(([, r]) => r === u.role)?.[0] || 'PLAYER',
-        color: normalizeColor(u.color),
-        avatar: u.avatar,
-        permissions: u.permissions,
-        flags: u.flags,
-        defaultSelected: true,
-      };
-    });
+    const roleNames = Object.fromEntries(Object.entries(CONST.USER_ROLES).map(([name, role]) => [role, name]));
+    const players = game.users.map((u) => ({
+      id: u.id,
+      name: u.name,
+      roleName: roleNames[u.role] || 'PLAYER',
+      color: normalizeColor(u.color),
+    }));
 
     const compendiumFoldersCount = game.folders.filter((f) => f.type === 'Compendium').length;
 
@@ -198,64 +192,54 @@ export default class DataHelper {
    */
   static buildExportPayload({ selectedKeys = new Set(), selectedPlayerIds = new Set(), includeCompendiumFolders = true }) {
     const worldStorage = game.settings.storage.get('world');
-    const system = game.system ?? game.data?.system;
-
-    const systemAuthors = Array.from(system?.authors ?? []).map((a) => (typeof a === 'string' ? a : a?.name ?? a)).filter(Boolean);
-    if (!systemAuthors.length && system?.author) systemAuthors.push(system.author);
+    const system = game.system;
 
     // Exported settings array
     const exportedSettings = [];
     for (const key of selectedKeys) {
       if (this.DEPRECATED_SETTINGS.has(key)) continue;
 
-      const [namespace, ...keyParts] = key.split('.');
-      const subKey = keyParts.join('.');
       let valString = null;
-
-      try {
-        const val = game.settings.get(namespace, subKey);
-        valString = JSON.stringify(val);
-      } catch {
-        // Fallback to world database storage
-        const doc = worldStorage?.getSetting?.(key) ?? worldStorage?.find?.((s) => s.key === key);
-        if (doc) valString = doc.value;
+      if (game.settings.settings.has(key)) {
+        const [namespace, ...keyParts] = key.split('.');
+        try {
+          valString = JSON.stringify(game.settings.get(namespace, keyParts.join('.')));
+        } catch (e) {
+          console.error(`Copy Environment | Could not export setting ${key}:`, e);
+        }
+      } else {
+        // Orphaned setting, read the raw value from the world database
+        valString = worldStorage?.getItem(key) ?? null;
       }
 
-      if (valString !== null) {
-        exportedSettings.push({
-          key,
-          value: valString,
-        });
+      if (valString !== null && valString !== undefined) {
+        exportedSettings.push({ key, value: valString });
       }
     }
 
     // Exported players
     const exportedPlayers = game.users
       .filter((u) => selectedPlayerIds.has(u.id))
-      .map((userData) => ({
-        name: userData.name,
+      .map((user) => ({
+        name: user.name,
         core: {
-          avatar: userData.avatar,
-          color: userData.color instanceof foundry.utils.Color ? userData.color.css : (userData.color?.css ?? userData.color),
-          permissions: userData.permissions,
-          role: userData.role,
+          avatar: user.avatar,
+          color: normalizeColor(user.color),
+          permissions: user.permissions,
+          role: user.role,
         },
-        flags: userData.flags,
+        flags: user.flags,
       }));
 
-    // Active modules list for environment reference
-    const modulesMetadata = Array.from(game.modules.values()).map((m) => {
-      const authors = Array.from(m.authors ?? []).map((a) => (typeof a === 'string' ? a : a?.name ?? a)).filter(Boolean);
-      if (!authors.length && m.author) authors.push(m.author);
-      return {
-        id: m.id,
-        title: m.title,
-        version: m.version,
-        active: m.active,
-        authors: Array.from(new Set(authors)).join(', '),
-        manifest: m.manifest,
-      };
-    });
+    // Modules list for environment reference
+    const modulesMetadata = game.modules.map((m) => ({
+      id: m.id,
+      title: m.title,
+      version: m.version,
+      active: m.active,
+      authors: formatAuthors(m),
+      manifest: m.manifest,
+    }));
 
     const supportingData = {
       compendiumFolders: includeCompendiumFolders
@@ -267,13 +251,13 @@ export default class DataHelper {
       version: 2,
       generator: {
         module: moduleName,
-        version: game.modules.get(moduleName)?.version || '14.2.0',
+        version: game.modules.get(moduleName)?.version,
         coreVersion: game.version,
         system: {
-          id: system?.id ?? system?.name,
-          version: system?.version,
-          title: system?.title,
-          author: Array.from(new Set(systemAuthors)).join(', '),
+          id: system.id,
+          version: system.version,
+          title: system.title,
+          author: formatAuthors(system),
         },
         exportedAt: new Date().toISOString(),
         worldId: game.world.id,
@@ -298,7 +282,7 @@ export default class DataHelper {
       // Legacy v1 flat array format
       for (const item of raw) {
         if (!item || typeof item !== 'object') continue;
-        if (item.type === Setting.SupportingDataType) {
+        if (item.type === SUPPORTING_DATA_TYPE) {
           supportingData = foundry.utils.mergeObject(supportingData, item.value || {});
         } else if (item.key && item.value) {
           settingsList.push(item);
@@ -316,45 +300,20 @@ export default class DataHelper {
       throw new Error(game.i18n.localize('niks-copy-environment.import.invalidFileError'));
     }
 
-    const systemId = game.system.id;
+    const maxLength = getMaxDiffLength();
+    const missingLabel = game.i18n.localize('niks-copy-environment.badges.missing');
     const groups = new Map();
 
     const getOrCreateGroup = (namespace) => {
-      if (groups.has(namespace)) return groups.get(namespace);
-
-      let type = MODULE_STATUS.MISSING;
-      let title = namespace;
-      let version = '';
-
-      if (namespace === 'core') {
-        type = MODULE_STATUS.CORE;
-        title = 'Foundry Virtual Tabletop Core';
-        version = game.version;
-      } else if (namespace === systemId) {
-        type = MODULE_STATUS.SYSTEM;
-        title = game.system.title || namespace;
-        version = game.system.version || '';
-      } else {
-        const mod = game.modules.get(namespace);
-        if (mod) {
-          type = mod.active ? MODULE_STATUS.ACTIVE : MODULE_STATUS.INACTIVE;
-          title = mod.title || namespace;
-          version = mod.version || '';
-        } else {
-          type = MODULE_STATUS.MISSING;
-          title = `${namespace} (${game.i18n.localize('niks-copy-environment.badges.missing')})`;
-        }
+      let group = groups.get(namespace);
+      if (!group) {
+        group = {
+          ...this.describeNamespace(namespace, MODULE_STATUS.MISSING, `${namespace} (${missingLabel})`),
+          settings: [],
+          hasChanges: false,
+        };
+        groups.set(namespace, group);
       }
-
-      const group = {
-        id: namespace,
-        title,
-        version,
-        type,
-        settings: [],
-        hasChanges: false,
-      };
-      groups.set(namespace, group);
       return group;
     };
 
@@ -362,11 +321,17 @@ export default class DataHelper {
     const selectedProperties = game.settings.get(moduleName, 'selected-properties') || {};
 
     for (const rawSetting of settingsList) {
-      if (!rawSetting.key) continue;
+      if (!rawSetting?.key || typeof rawSetting.key !== 'string') continue;
       const [namespace] = rawSetting.key.split('.');
       const group = getOrCreateGroup(namespace);
 
-      const worldSetting = new WorldSetting(rawSetting);
+      let worldSetting;
+      try {
+        worldSetting = new WorldSetting(rawSetting, { maxLength });
+      } catch (e) {
+        console.error('Copy Environment | Could not analyze setting:', rawSetting.key, e);
+        continue;
+      }
       const isChanged = worldSetting.hasChanges();
       if (isChanged) group.hasChanges = true;
 
@@ -384,8 +349,7 @@ export default class DataHelper {
 
       group.settings.push({
         key: rawSetting.key,
-        rawSetting,
-        worldSetting,
+        value: rawSetting.value,
         isChanged,
         isSelected,
         oldString: worldSetting.difference.oldString ?? '—',
@@ -393,22 +357,7 @@ export default class DataHelper {
       });
     }
 
-    // Sort groups
-    const order = {
-      [MODULE_STATUS.CORE]: 1,
-      [MODULE_STATUS.SYSTEM]: 2,
-      [MODULE_STATUS.ACTIVE]: 3,
-      [MODULE_STATUS.INACTIVE]: 4,
-      [MODULE_STATUS.MISSING]: 5,
-    };
-
-    const sortedGroups = Array.from(groups.values())
-      .filter((g) => g.settings.length > 0)
-      .sort((a, b) => {
-        const diff = (order[a.type] || 99) - (order[b.type] || 99);
-        if (diff !== 0) return diff;
-        return a.title.localeCompare(b.title);
-      });
+    const sortedGroups = Array.from(groups.values()).filter((g) => g.settings.length > 0).sort(compareGroups);
 
     // Analyze players
     const analyzedPlayers = [];
@@ -416,31 +365,24 @@ export default class DataHelper {
     const notChangedPlayers = [];
 
     for (const rawPlayer of playersList) {
-      const playerSetting = new PlayerSetting(rawPlayer);
+      if (!rawPlayer?.name) continue;
+      const playerSetting = new PlayerSetting(rawPlayer, { maxLength });
       if (playerSetting.playerNotFound) {
         notFoundPlayers.push(rawPlayer.name);
       } else if (!playerSetting.hasChanges()) {
         notChangedPlayers.push(rawPlayer.name);
       } else {
+        const toEntries = (differences, type) => Object.entries(differences).map(([field, diff]) => ({
+          field,
+          type,
+          oldString: diff.oldString,
+          newString: diff.newString,
+          newVal: diff.newVal,
+        }));
         analyzedPlayers.push({
           name: rawPlayer.name,
-          playerSetting,
-          differences: Object.entries(playerSetting.playerDifferences).map(([field, diff]) => ({
-            field,
-            type: 'core',
-            name: `${rawPlayer.name}--${field}`,
-            oldString: diff.oldString,
-            newString: diff.newString,
-            isSelected: true,
-          })),
-          flagDifferences: Object.entries(playerSetting.playerFlagDifferences).map(([flagKey, diff]) => ({
-            field: flagKey,
-            type: 'flag',
-            name: `${rawPlayer.name}--flag--${flagKey}`,
-            oldString: diff.oldString,
-            newString: diff.newString,
-            isSelected: true,
-          })),
+          differences: toEntries(playerSetting.playerDifferences, 'core'),
+          flagDifferences: toEntries(playerSetting.playerFlagDifferences, 'flag'),
         });
       }
     }
@@ -452,7 +394,6 @@ export default class DataHelper {
       notFoundPlayers,
       notChangedPlayers,
       supportingData,
-      totalChanges: sortedGroups.reduce((acc, g) => acc + g.settings.filter((s) => s.isChanged).length, 0) + analyzedPlayers.length,
     };
   }
 
@@ -462,132 +403,134 @@ export default class DataHelper {
   static async applyImport({ selectedSettings = [], selectedPlayerChanges = [], supportingData = {} }) {
     let changed = false;
 
-    // 1. Process World and Client Settings
-    if (selectedSettings.length > 0) {
-      const updates = [];
-      const creates = [];
-      const worldStorage = game.settings.storage.get('world');
+    // 1. Process World, User and Client Settings
+    const updates = [];
+    const creates = [];
+    const worldStorage = game.settings.storage.get('world');
 
-      for (const data of selectedSettings) {
-        const config = game.settings.settings.get(data.key);
+    for (const data of selectedSettings) {
+      const config = game.settings.settings.get(data.key);
 
-        if (config?.scope === 'client') {
-          const storage = game.settings.storage.get('client');
-          if (storage) {
-            storage.setItem(data.key, data.value);
-            changed = true;
-          }
-        } else if (game.user.isGM) {
-          const existing = worldStorage?.getSetting?.(data.key)
-            ?? game.data?.settings?.find((s) => s.key === data.key);
-
-          // Handle compendium configuration folder ID remapping
-          if (data.key === 'core.compendiumConfiguration') {
-            try {
-              let existingVal = existing?.value;
-              if (!existingVal) {
-                const currentSetting = game.settings.get('core', 'compendiumConfiguration');
-                existingVal = currentSetting ? JSON.stringify(currentSetting) : '{}';
-              }
-              const existingCompendiumMap = typeof existingVal === 'string' ? JSON.parse(existingVal) : (existingVal || {});
-              const newCompendiumMap = typeof data.value === 'string' ? JSON.parse(data.value) : (data.value || {});
-              const missingEntries = new Map();
-
-              for (const [key, value] of Object.entries(newCompendiumMap)) {
-                if (game.folders.get(existingCompendiumMap[key]?.folder)) {
-                  newCompendiumMap[key].folder = existingCompendiumMap[key].folder;
-                } else {
-                  missingEntries.set(key, value);
-                }
-              }
-
-              for (const [key, value] of missingEntries) {
-                const folder = await this.createFolderRecursive(value?.folder, supportingData?.compendiumFolders);
-                if (folder?.id) {
-                  newCompendiumMap[key].folder = folder.id;
-                }
-              }
-
-              data.value = JSON.stringify(newCompendiumMap);
-            } catch (e) {
-              console.warn('Copy Environment | Could not process compendium configuration:', e);
-            }
-          }
-
-          if (existing?._id) {
-            updates.push({
-              _id: existing._id,
-              key: data.key,
-              value: data.value,
-            });
-          } else {
-            creates.push({
-              key: data.key,
-              value: data.value,
-            });
-          }
+      if (config?.scope === CONST.SETTING_SCOPES.CLIENT) {
+        game.settings.storage.get('client')?.setItem(data.key, data.value);
+        changed = true;
+      } else if (config?.scope === CONST.SETTING_SCOPES.USER) {
+        // User-scoped settings are stored per user, so they can only be applied to the importing user.
+        try {
+          await game.settings.set(config.namespace, config.key, JSON.parse(data.value));
+          changed = true;
+        } catch (e) {
+          console.error(`Copy Environment | Could not import user setting ${data.key}:`, e);
         }
-      }
+      } else if (game.user.isGM) {
+        let value = data.value;
+        if (data.key === 'core.compendiumConfiguration') {
+          value = await this.remapCompendiumConfiguration(value, supportingData?.compendiumFolders);
+        }
 
-      const socket = foundry.helpers?.SocketInterface ?? globalThis.SocketInterface;
-      if (updates.length > 0) {
-        log(true, `Updating ${updates.length} world settings.`);
-        await socket.dispatch('modifyDocument', {
-          type: 'Setting',
-          action: 'update',
-          updates: updates,
-          operation: { pack: null, parent: null, updates: updates },
-        });
-        changed = true;
-      }
-
-      if (creates.length > 0) {
-        log(true, `Creating ${creates.length} world settings.`);
-        await socket.dispatch('modifyDocument', {
-          type: 'Setting',
-          action: 'create',
-          data: creates,
-          operation: { pack: null, parent: null, data: creates },
-        });
-        changed = true;
+        const existing = worldStorage?.getSetting(data.key);
+        if (existing?._id) {
+          updates.push({ _id: existing._id, key: data.key, value });
+        } else {
+          creates.push({ key: data.key, value });
+        }
       }
     }
 
-    // 2. Process Player Changes
+    const socket = foundry.helpers.SocketInterface;
+    if (updates.length > 0) {
+      log(true, `Updating ${updates.length} world settings.`);
+      await socket.dispatch('modifyDocument', {
+        type: 'Setting',
+        action: 'update',
+        updates,
+        operation: { pack: null, parent: null, updates },
+      });
+      changed = true;
+    }
+
+    if (creates.length > 0) {
+      log(true, `Creating ${creates.length} world settings.`);
+      await socket.dispatch('modifyDocument', {
+        type: 'Setting',
+        action: 'create',
+        data: creates,
+        operation: { pack: null, parent: null, data: creates },
+      });
+      changed = true;
+    }
+
+    // 2. Process Player Changes (only GMs may modify other users)
+    if (selectedPlayerChanges.length && !game.user.isGM) {
+      log(true, 'Skipping player changes, only GMs can update users.');
+      return changed;
+    }
+
     for (const playerUpdate of selectedPlayerChanges) {
       const user = game.users.getName(playerUpdate.name);
       if (!user) continue;
 
-      const updateData = {};
-      if (playerUpdate.core && !foundry.utils.isEmpty(playerUpdate.core)) {
-        Object.assign(updateData, playerUpdate.core);
-      }
-      if (playerUpdate.flags && !foundry.utils.isEmpty(playerUpdate.flags)) {
+      const updateData = { ...playerUpdate.core };
+      if (!foundry.utils.isEmpty(playerUpdate.flags ?? {})) {
         updateData.flags = playerUpdate.flags;
       }
+      if (foundry.utils.isEmpty(updateData)) continue;
 
-      if (!foundry.utils.isEmpty(updateData)) {
+      try {
         await user.update(updateData);
         changed = true;
         ui.notifications.info(game.i18n.format('niks-copy-environment.import.updatedPlayer', { name: user.name }));
+      } catch (e) {
+        console.error(`Copy Environment | Could not update user ${user.name}:`, e);
       }
     }
 
     return changed;
   }
 
+  /**
+   * The Compendium Configuration setting maps compendiums to folders, and folder IDs differ between worlds.
+   * Keep existing folder mappings and recreate missing folders from the supporting data where possible.
+   * @param {string} value                  The imported setting value (JSON string)
+   * @param {object[]} [compendiumFolders]  Exported compendium folder data
+   * @returns {Promise<string>}             The remapped setting value (JSON string)
+   */
+  static async remapCompendiumConfiguration(value, compendiumFolders = []) {
+    try {
+      const existingMap = game.settings.get('core', 'compendiumConfiguration') ?? {};
+      const newMap = typeof value === 'string' ? JSON.parse(value) : (value || {});
+
+      for (const [key, config] of Object.entries(newMap)) {
+        const existingFolderId = existingMap[key]?.folder;
+        if (existingFolderId && game.folders.get(existingFolderId)) {
+          config.folder = existingFolderId;
+          continue;
+        }
+        const folder = await this.createFolderRecursive(config?.folder, compendiumFolders);
+        if (folder?.id) config.folder = folder.id;
+      }
+
+      return JSON.stringify(newMap);
+    } catch (e) {
+      console.warn('Copy Environment | Could not process compendium configuration:', e);
+      return value;
+    }
+  }
+
   static async createFolderRecursive(folderID, compendiumFolders = []) {
     if (!folderID) return undefined;
-    if (game.folders.get(folderID)) return game.folders.get(folderID);
+    const existing = game.folders.get(folderID);
+    if (existing) return existing;
 
-    const folderData = compendiumFolders.find((f) => f._id === folderID);
+    const folderData = compendiumFolders?.find((f) => f._id === folderID);
     if (!folderData) return undefined;
 
     if (folderData.folder && !game.folders.get(folderData.folder)) {
       const parentFolder = await this.createFolderRecursive(folderData.folder, compendiumFolders);
-      if (parentFolder?.id) folderData.folder = parentFolder.id;
+      folderData.folder = parentFolder?.id ?? null;
     }
 
-    return Folder.create(folderData, { keepId: true });
+    log(false, `Creating missing folder "${folderData.name}" with ID ${folderID}`);
+    return foundry.documents.Folder.implementation.create(folderData, { keepId: true });
   }
 }

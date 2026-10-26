@@ -1,11 +1,5 @@
 export const name = 'niks-copy-environment';
 
-export const templates = {
-  settings: `modules/${name}/templates/settings.html`,
-  exportDialog: `modules/${name}/templates/export-dialog.hbs`,
-  importDialog: `modules/${name}/templates/import-dialog.hbs`,
-};
-
 export function log(force, ...args) {
   try {
     if (typeof force !== "boolean") {
@@ -20,6 +14,7 @@ export function log(force, ...args) {
     if (force || isDebugging) {
       console.log("Copy Environment |", ...args);
     }
-  } catch (e) {
+  } catch {
+    // Logging must never throw
   }
 }

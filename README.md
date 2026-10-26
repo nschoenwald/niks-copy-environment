@@ -39,6 +39,20 @@ Go to Settings tab in Sidebar and **right click** on data **below** "General Inf
 
 ## Info for Module Developers
 
+### API
+
+The module exposes `globalThis.NiksCopyEnvironment` after `init`:
+
+* `NiksCopyEnvironment.openExport()` – open the export dialog.
+* `NiksCopyEnvironment.openImport()` – pick an export file and open the import dialog.
+* `NiksCopyEnvironment.Core.copyAsText()` / `Core.saveSummaryAsJSON()` – copy or download the environment summary.
+
+### Importing scoped settings
+
+* **World** settings are written to the world database (GM only).
+* **User** settings are applied to the user performing the import.
+* **Client** settings are written to the importing browser's local storage.
+
 ### How do I opt out?
 
 Perhaps you have a module that you don't want the settings being copied between worlds. You can add the following to your module manifest file to opt out of having the settings copied. The `active` state of your module will still be copied, just the settings won't.

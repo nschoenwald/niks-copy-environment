@@ -1,74 +1,71 @@
-import {name as moduleName} from './config.js';
+import { name as moduleName } from './config.js';
 
-export default class Setting {
-  /**
-   * @param {Object} data - either World settings or Player settings
-   */
-  constructor(data) {
-    this.type = Setting.UnknownType;
-    this.data = data;
-    this.value = undefined;
+/**
+ * Read the configured maximum diff display length.
+ * @returns {number} 0 means "no limit".
+ */
+export function getMaxDiffLength() {
+  const value = Number(game.settings.get(moduleName, 'diff-length'));
+  return Number.isFinite(value) && value > 0 ? value : 0;
+}
 
-    if (!data || typeof data !== 'object') {
-      console.error('Copy Environment | Unknown setting received:', data);
-      return this;
-    }
-
-    if (data.key && data.value) {
-      this.type = Setting.WorldType;
-      this.value = new WorldSetting(this.data);
-    } else if (data.name) {
-      this.type = Setting.PlayerType;
-      this.value = new PlayerSetting(this.data);
-    } else if (data.type === Setting.SupportingDataType) {
-      this.type = Setting.SupportingDataType;
-      this.value = data.value;
-    }
-  }
-
-  static UnknownType = '_unknownType';
-  static PlayerType = '_playerType';
-  static WorldType = '_worldType';
-  static SupportingDataType = '_supportingDataType';
-
-  isWorldSetting() {
-    return this.type === Setting.WorldType;
-  }
-
-  isPlayerSetting() {
-    return this.type === Setting.PlayerType;
-  }
-
-  isSupportingDataSetting() {
-    return this.type === Setting.SupportingDataType;
-  }
-
-  hasChanges() {
-    if (!this.value) {
-      return false;
-    }
-
-    return this.value.hasChanges();
+/**
+ * Parse a JSON string, returning the raw input if it is not valid JSON.
+ * @param {*} value
+ * @returns {*}
+ */
+function parseJSON(value) {
+  if (typeof value !== 'string') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
   }
 }
 
 /**
- * WorldSetting represents a world level setting.
+ * Normalize a value to its plain JSON representation (e.g. DataModel instances, Color objects),
+ * which is the same form in which the value was exported.
+ * @param {*} value
+ * @returns {*}
+ */
+function toPlainJSON(value) {
+  if (value === undefined) return undefined;
+  const json = JSON.stringify(value);
+  return json === undefined ? undefined : JSON.parse(json);
+}
+
+/**
+ * Normalize a user color to a css string so Color objects and hex strings compare equal.
+ * @param {*} c
+ * @returns {*}
+ */
+export function normalizeColor(c) {
+  try {
+    return c ? (foundry.utils.Color.from(c)?.css ?? c) : c;
+  } catch {
+    return c?.css ?? c;
+  }
+}
+
+/**
+ * WorldSetting represents a world, user or client level setting from an import file.
  */
 export class WorldSetting {
   /**
-   * Create a world setting from Foundry data.
-   * @param {Object} setting
+   * @param {{key: string, value: string}} setting  The exported setting (value is a JSON string)
+   * @param {object} [options]
+   * @param {number} [options.maxLength]            Maximum display length of difference strings
    */
-  constructor(setting) {
-    if (!setting) {
-      throw 'Invalid data';
+  constructor(setting, { maxLength = getMaxDiffLength() } = {}) {
+    if (!setting?.key) {
+      throw new Error('Invalid data');
     }
 
     this.key = setting.key;
     this.value = setting.value;
-    this.difference = this.calculateDifference();
     this.group = this.key.split('.').shift();
+    this.difference = this.calculateDifference(maxLength);
   }
 
   hasChanges() {
@@ -76,45 +73,30 @@ export class WorldSetting {
   }
 
   /**
-   * Compares the parsed JSON setting data if possible to handle object order differences.
+   * Compares the parsed JSON setting data to handle object key order differences.
+   * @param {number} maxLength
    * @returns {Difference}
    */
-  calculateDifference() {
-    const keyParts = this.key.split('.');
-    const namespace = keyParts.shift();
-    const key = keyParts.join('.');
-    let existingSetting;
-    try {
-      existingSetting = game.settings.get(namespace, key);
-    } catch (e) {
-      // do nothing, it just means the setting isn't registered, likely because the module isn't enabled.
-    }
-    try {
-      let newValue = this.value;
-      if (newValue) {
-        newValue = JSON.parse(newValue);
+  calculateDifference(maxLength) {
+    const [namespace, ...keyParts] = this.key.split('.');
+    let existing;
+    if (game.settings.settings.has(this.key)) {
+      try {
+        existing = toPlainJSON(game.settings.get(namespace, keyParts.join('.')));
+      } catch (e) {
+        console.error('Copy Environment | Could not read current setting value:', this.key, e);
       }
-      if (existingSetting && typeof existingSetting === 'object' && newValue && typeof newValue === 'object') {
-        let diff = foundry.utils.diffObject(existingSetting, newValue, { bidirectional: true });
-        if (foundry.utils.isEmpty(diff)) {
-          // No difference in the underlying object.
-          return new Difference(this.key, null, null);
-        }
-      }
-
-      if (existingSetting === newValue) {
-        return new Difference(this.key, null, null);
-      }
-
-      return new Difference(this.key, existingSetting, newValue);
-    } catch (e) {
-      console.error('Copy Environment | Could not parse world setting values:', this.key, e);
+    } else {
+      // Not registered (module not installed or not active), compare against the stored world value.
+      const stored = game.settings.storage.get('world')?.getItem(this.key);
+      existing = stored === null || stored === undefined ? undefined : parseJSON(stored);
     }
 
-    // Return the difference of the original values, not the parsed values.
-    let existingSettings = game.settings?.storage?.get('world')?.getSetting(this.key)
-      ?? game.data?.settings?.find((s) => s.key === this.key);
-    return new Difference(this.key, existingSettings?.value, this.value);
+    const newValue = parseJSON(this.value);
+    if (foundry.utils.equals(existing, newValue)) {
+      return new Difference(this.key, null, null, maxLength);
+    }
+    return new Difference(this.key, existing, newValue, maxLength);
   }
 }
 
@@ -123,12 +105,20 @@ export class WorldSetting {
  */
 export class PlayerSetting {
   /**
-   * Create a player setting from Foundry data.
-   * @param {Object} setting
+   * Fields of the `core` export block that are compared and can be imported.
+   * @type {string[]}
    */
-  constructor(setting) {
+  static CORE_FIELDS = ['avatar', 'color', 'permissions', 'role'];
+
+  /**
+   * Create a player setting from exported data.
+   * @param {object} setting
+   * @param {object} [options]
+   * @param {number} [options.maxLength]  Maximum display length of difference strings
+   */
+  constructor(setting, { maxLength = getMaxDiffLength() } = {}) {
     if (!setting) {
-      throw 'Invalid data';
+      throw new Error('Invalid data');
     }
 
     this.name = setting.name;
@@ -136,77 +126,46 @@ export class PlayerSetting {
     this.playerDifferences = {};
     this.playerFlagDifferences = {};
 
-    const existingUser = game.users.getName(this.name);
-    if (!existingUser) {
+    const user = game.users.getName(this.name);
+    if (!user) {
       this.playerNotFound = true;
-      return this;
+      return;
     }
 
-    const userData = existingUser;
-
-    const normalizeColor = (c) => {
-      try {
-        return c ? (foundry.utils.Color?.from(c)?.css ?? c) : c;
-      } catch {
-        return c?.css ?? c;
+    const core = setting.core ?? {};
+    for (const field of PlayerSetting.CORE_FIELDS) {
+      if (!(field in core)) continue;
+      let current = toPlainJSON(user[field]);
+      let incoming = core[field];
+      if (field === 'color') {
+        current = normalizeColor(user.color);
+        incoming = normalizeColor(incoming);
       }
-    };
-    const userColor = normalizeColor(userData.color);
-    const settingColor = normalizeColor(setting.core?.color);
-
-    if (userColor !== settingColor) {
-      this.playerDifferences.color = new Difference(
-        'color',
-        userColor,
-        settingColor
-      );
-    }
-
-    if (setting.core.role !== userData.role) {
-      this.playerDifferences.role = new Difference(
-        'role',
-        userData.role,
-        setting.core.role
-      );
-    }
-
-    if (JSON.stringify(setting.core.permissions) !== JSON.stringify(userData.permissions)) {
-      this.playerDifferences.permissions = new Difference(
-        'permissions',
-        userData.permissions,
-        setting.core.permissions
-      );
-    }
-
-    let flagDiff = foundry.utils.diffObject(userData.flags, setting.flags);
-    for (const prop in flagDiff) {
-      if (!flagDiff.hasOwnProperty(prop)) {
-        continue;
+      if (!foundry.utils.equals(current, incoming)) {
+        this.playerDifferences[field] = new Difference(field, current, incoming, maxLength);
       }
-      this.playerFlagDifferences[prop] = new Difference(
-        prop,
-        userData.flags[prop],
-        flagDiff[prop]
-      );
     }
 
-    this.name = setting.name;
-    this.value = setting.value;
+    const userFlags = user.flags ?? {};
+    const flagDiff = foundry.utils.diffObject(userFlags, setting.flags ?? {});
+    for (const [prop, value] of Object.entries(flagDiff)) {
+      this.playerFlagDifferences[prop] = new Difference(prop, userFlags[prop], value, maxLength);
+    }
   }
 
   /**
-   * Returns whether this player setting is identical to a player of the same name in the current world.
-   * @returns boolean
+   * Returns whether this player setting differs from a player of the same name in the current world.
+   * @returns {boolean}
    */
   hasChanges() {
     return this.playerNotFound || this.hasDataChanges();
   }
 
   /**
-   * Returns whether this player setting has the same data values as a player of the same name in the current world.
+   * Returns whether this player setting has different data values than a player of the same name in the current world.
    * Note that if there is not a matching player, there are no data changes.
    * @see hasChanges
-   * @returns boolean
+   * @returns {boolean}
    */
   hasDataChanges() {
     return !foundry.utils.isEmpty(this.playerDifferences) || !foundry.utils.isEmpty(this.playerFlagDifferences);
@@ -222,26 +181,23 @@ export class Difference {
    * @param {string} name
    * @param {*} oldValue
    * @param {*} newValue
+   * @param {number} [maxLength]  Maximum display length of the difference strings, 0 for unlimited
    */
-  constructor(name, oldValue, newValue) {
+  constructor(name, oldValue, newValue, maxLength = getMaxDiffLength()) {
     this.name = name;
     if (oldValue !== newValue) {
-      let diffSize = game.settings.get(moduleName, "diff-length");
-      if (diffSize < 0) {
-        diffSize = 0;
-      }
-
       this.oldVal = oldValue;
-      this.oldString = JSON.stringify(oldValue);
-      if (diffSize && this.oldString?.length > diffSize) {
-        this.oldString = this.oldString.substring(0, diffSize) + '...';
-      }
+      this.oldString = Difference.truncate(JSON.stringify(oldValue), maxLength);
       this.newVal = newValue;
-      this.newString = JSON.stringify(newValue);
-      if (diffSize && this.newString?.length > diffSize) {
-        this.newString = this.newString.substring(0, diffSize) + '...';
-      }
+      this.newString = Difference.truncate(JSON.stringify(newValue), maxLength);
     }
+  }
+
+  static truncate(str, maxLength) {
+    if (maxLength && str?.length > maxLength) {
+      return str.substring(0, maxLength) + '...';
+    }
+    return str;
   }
 
   hasChanges() {

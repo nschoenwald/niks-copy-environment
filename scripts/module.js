@@ -11,6 +11,8 @@ Hooks.once('init', function () {
     DataHelper,
     SettingsExportApp,
     SettingsImportApp,
+    openExport: openExportApp,
+    openImport: openImportFilePicker,
   };
 
   game.settings.register(name, 'selected-properties', {
@@ -41,69 +43,48 @@ Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
 });
 
 function openExportApp() {
-  new SettingsExportApp().render({ force: true });
+  return SettingsExportApp.open();
 }
 
 function openImportFilePicker() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.json,application/json';
-  input.addEventListener('change', async function () {
-    const file = this.files?.[0];
+  input.addEventListener('change', async () => {
+    const file = input.files?.[0];
     if (!file) return;
+    let data;
     try {
-      const content = await foundry.utils.readTextFromFile(file);
-      const data = JSON.parse(content);
-      new SettingsImportApp(data).render({ force: true });
+      data = JSON.parse(await foundry.utils.readTextFromFile(file));
     } catch (e) {
       console.error('Copy Environment | Could not parse import file:', e);
       ui.notifications.error(game.i18n.localize('niks-copy-environment.import.invalidFileError'));
+      return;
+    }
+    try {
+      await SettingsImportApp.open(data);
+    } catch (e) {
+      console.error('Copy Environment | Could not open import dialog:', e);
+      ui.notifications.error(game.i18n.localize('niks-copy-environment.import.errorOccurred'));
     }
   });
   input.click();
 }
 
-Hooks.on('renderSettings', function (app, html, data) {
-  // In V14, the Settings sidebar is an ApplicationV2 and `html` is a native HTMLElement.
-  const container = html instanceof HTMLElement ? html : html[0] ?? html;
-
-  // Prevent duplicate ContextMenu attachments on re-renders of the Settings tab
-  if (container._copyEnvironmentContextMenu) return;
-  container._copyEnvironmentContextMenu = true;
-
-  const ContextMenuCls = foundry.applications?.ux?.ContextMenu?.implementation ?? globalThis.ContextMenu;
+Hooks.on('renderSettings', function (app, html) {
+  // The Settings sidebar element persists across re-renders, so only attach the ContextMenu once.
+  if (html._copyEnvironmentContextMenu) return;
+  html._copyEnvironmentContextMenu = true;
 
   const menuItems = [
     {
-      name: game.i18n.localize('niks-copy-environment.menu.copy'),
-      label: game.i18n.localize('niks-copy-environment.menu.copy'),
+      label: 'niks-copy-environment.menu.copy',
       icon: 'far fa-copy',
-      callback: () => {
-        try {
-          Core.copyAsText();
-        } catch (e) {
-          console.error('Copy Environment | Error copying to clipboard:', e);
-        }
-      },
-      onClick: () => {
-        try {
-          Core.copyAsText();
-        } catch (e) {
-          console.error('Copy Environment | Error copying to clipboard:', e);
-        }
-      },
+      onClick: () => Core.copyAsText(),
     },
     {
-      name: game.i18n.localize('niks-copy-environment.menu.save'),
-      label: game.i18n.localize('niks-copy-environment.menu.save'),
+      label: 'niks-copy-environment.menu.save',
       icon: 'fas fa-copy',
-      callback: () => {
-        try {
-          Core.saveSummaryAsJSON();
-        } catch (e) {
-          console.error('Copy Environment | Error saving summary JSON:', e);
-        }
-      },
       onClick: () => {
         try {
           Core.saveSummaryAsJSON();
@@ -113,22 +94,18 @@ Hooks.on('renderSettings', function (app, html, data) {
       },
     },
     {
-      name: game.i18n.localize('niks-copy-environment.menu.export'),
-      label: game.i18n.localize('niks-copy-environment.menu.export'),
+      label: 'niks-copy-environment.menu.export',
       icon: 'fas fa-file-export',
-      callback: () => openExportApp(),
       onClick: () => openExportApp(),
     },
     {
-      name: game.i18n.localize('niks-copy-environment.menu.import'),
-      label: game.i18n.localize('niks-copy-environment.menu.import'),
+      label: 'niks-copy-environment.menu.import',
       icon: 'fas fa-file-import',
-      callback: () => openImportFilePicker(),
       onClick: () => openImportFilePicker(),
     },
   ];
 
-  new ContextMenuCls(container, 'section.info, section.general-information, [data-setting-id]', menuItems, {
+  new foundry.applications.ux.ContextMenu.implementation(html, 'section.info', menuItems, {
     jQuery: false,
   });
 });
