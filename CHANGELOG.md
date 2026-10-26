@@ -1,197 +1,215 @@
 # Changelog
 
-## v14.2.1
+All notable changes to **Nik's Copy Environment (`niks-copy-environment`)** are documented in this file.
 
-- **CSS Spill Fix**:
-  - Strictly scoped all styles in `styles/module.css` to `.niks-copy-environment-app` using native CSS nesting and restored scoped styles for legacy `#niks-copy-environment-settings`.
-  - Resolves style collisions where unscoped utility classes (such as `.badge`, `.tag`, `.button-primary`, `.status-icon`, `.search-bar`, etc.) affected core Foundry applications and system sheets—including the level badge on the DnD 5e player character sheet.
-- **Syntax Error Fix**:
-  - Restored the missing `static exportGameSettings()` method declaration in `scripts/core.js`, fixing the `Uncaught SyntaxError: Unexpected identifier 'excludeModules'`.
+## [14.3.0] - 2026-10-26
+### Fixed
+- **Import: Long Player Values Cut Off**:
+  - Fixed player permissions and flags being saved cut off (ending in "...") when they were longer than the **Number of characters** preview limit. The full value is always imported now.
+- **Import: Per-User Settings**:
+  - Fixed per-user settings being imported as world-wide settings. They are now applied to the user who runs the import.
+- **Import: Files Failing to Open**:
+  - Fixed import files with a player entry that has no core data (only flags) failing to open.
+- **Import: Settings Wrongly Marked as Changed**:
+  - Settings that only differ in the order of their entries are no longer shown as changed.
+  - Settings of uninstalled modules are now compared against the value stored in the world, instead of always showing as changed.
+- **Import: Player Changes for Non-GMs**:
+  - Non-GM users no longer get an error when an import file contains player changes. Those changes are skipped, since only a GM can change other users.
+- **Import: Changed Filter**:
+  - The **Changed** filter now also hides unchanged settings inside a module, not just modules without any changes.
+- **Export & Import: Selection Counter and Module Checkboxes**:
+  - The selection counter and the module checkboxes now update when you tick individual settings. A module checkbox shows a partial state when only some of its settings are ticked.
+- **Export: Deselect All**:
+  - **Deselect All** no longer unticks the **Include Compendium Folder Mappings** option.
+- **Export & Import: Opening Twice**:
+  - Opening a dialog a second time now replaces the old window instead of leaving a broken copy behind.
+- **Copy as Text: Success Message**:
+  - Now uses Foundry's clipboard helper and only shows the success message when copying actually worked.
 
-## v14.2.0
+### Added
+- **Import: Player Avatars**:
+  - Player avatars from the export file are now compared and can be imported.
 
-- **New Modern Export & Import Applications (ApplicationV2)**:
-  - Rebuilt the export and import workflows using Foundry V14's `ApplicationV2` architecture with `HandlebarsApplicationMixin`.
-  - **Interactive Export Dialog (`SettingsExportApp`)**:
-    - Preview all settings before exporting with live search filtering and status pills (`All`, `Active`, `Inactive`, `Orphaned`, `System/Core`, `Players`).
-    - Clear distinction between **Active** (installed & enabled), **Inactive** (installed but disabled), and **Orphaned** settings (leftover in world database from deleted/uninstalled modules).
-    - Bulk selection controls: "Select All", "Active Only", "Deselect All", and module-level toggle checkboxes.
-    - Options to include compendium folder mappings and environment metadata.
-  - **Interactive Import Dialog (`SettingsImportApp`)**:
-    - Cross-references incoming export settings against the active world's installed packages.
-    - Clear visual indicators distinguishing **Active**, **Inactive**, and **Not Installed (Missing)** modules with warning callouts.
-    - Live diff inspection comparing Current Value vs New Value with change tags.
-    - Full backward compatibility with legacy v1 flat array JSON exports and enriched v2 structured exports.
-- **CI / Automation**:
-  - Added automated GitHub Actions release workflow (`.github/workflows/release.yml`) to package and attach `module.zip` and updated `module.json` assets upon publishing a GitHub release.
+### Changed
+- **Translations: Status Badges**:
+  - The Active, Inactive, Orphaned and Not Installed badges are now translated.
+- **Code Cleanup**:
+  - Removed the old, unused import window, its leftover translations and the duplicate `languages` folder. Nothing changes in how the module looks or behaves.
+- **Module API**:
+  - Macros can open the dialogs with `NiksCopyEnvironment.openExport()` and `NiksCopyEnvironment.openImport()`. The old `Core.exportGameSettings()` and `Core.importGameSettingsQuick()` have been removed.
 
-## v14.1.0
+### Improved
+- **Performance**:
+  - The export and import dialogs open faster in worlds with many settings.
 
+## [14.2.1] - 2026-09-29
+### Fixed
+- **Styling: Other Windows Affected**:
+  - Fixed the module's styles leaking into other windows and sheets, such as the level badge on the D&D 5e character sheet.
+- **Module Not Loading**:
+  - Fixed an error that stopped the module from loading.
+
+## [14.2.0] - 2026-09-28
+### Added
+- **New Export Window**:
+  - Preview every setting before exporting, with search and filters (**All**, **Active**, **Inactive**, **Orphaned**, **System / Core**, **Players**).
+  - Settings are marked **Active** (installed and enabled), **Inactive** (installed but disabled) or **Orphaned** (left behind in the world by an uninstalled module).
+  - Quick buttons: **Select All**, **Active Only** and **Deselect All**, plus a checkbox per module.
+  - Option to include compendium folder mappings.
+- **New Import Window**:
+  - Compares the file against the modules installed in this world, marking them **Active**, **Inactive** or **Not Installed** with warnings.
+  - Shows the new and current value of every setting side by side.
+  - Works with both older and new export files.
+
+## [14.1.0] - 2026-09-28
+### Changed
 - **Foundry V14 Compatibility**:
-  - Updated ContextMenu integration to support V14 standards (`label`, `onClick`, and explicitly passing `{ jQuery: false }`).
-  - Added a guard to prevent duplicate ContextMenu listener registration when the Settings sidebar tab re-renders.
-  - Replaced deprecated top-level `SocketInterface` usage with `foundry.helpers.SocketInterface`.
-  - Filtered out deprecated V14 core settings (`core.gridTemplates`, `core.coneTemplateType`) from settings export.
-  - Safely handle package manifest authors as a `Set` in V14 without relying on legacy `authors.length` or `author`.
-- **DnD5e v6 Compatibility**:
-  - Added `dnd5e.systemMigrationVersion` and `dnd5e.firstRun` to default unselected properties on import to safeguard target worlds from premature migration skipping or disrupted first-run setup.
-- **Bug Fixes & Refinements**:
-  - Fixed a bug where modern `Color` objects on User documents were strictly compared against hex strings, causing player colors to always falsely show as changed.
-  - Fixed a crash during Compendium Folder structure import when `core.compendiumConfiguration` had not yet been modified in the target world database.
-  - Normalized manifest paths in `module.json` and corrected `library` package flag to `false`.
+  - Updated the module for Foundry VTT v14, including the right-click menu in the Settings tab.
+  - Deprecated core settings (`core.gridTemplates`, `core.coneTemplateType`) are no longer exported.
+- **D&D 5e 6.x Compatibility**:
+  - `dnd5e.systemMigrationVersion` and `dnd5e.firstRun` are unticked by default on import, so the target world's migration and first-run setup aren't disrupted.
 
-## v2.2.4
+### Fixed
+- **Player Colors Always Changed**:
+  - Fixed player colors always showing as changed on import.
+- **Compendium Folders**:
+  - Fixed a crash when importing compendium folders into a world that never changed its compendium configuration.
 
-- Added Polish translation by Lioheart.
-- Enabled Italian and French translations.
+## [2.2.4]
+### Added
+- **Translations**: Polish translation by Lioheart. Italian and French translations enabled.
 
-## v2.2.3
+## [2.2.3]
+### Changed
+- **Module List Warning**:
+  - It is now clearer when modules will not be enabled because the module configuration setting is unticked. See [issue #49](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/49).
 
-- Made it clearer when modules will not be enabled due to the selected config settings.
-  - This is one of the primary use cases of this module, so most of the time it is an accident to uncheck the setting.
-  - See [issue #49](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/49).
-- Added Italian translation by GregoryWarn.
-- Added French translation by rectulo.
-- Added machine translations for the new setting strings:
-  - German
-  - Japanese
-  - Portuguese
-  - Italian
-  - French
+### Added
+- **Translations**: Italian by GregoryWarn and French by rectulo, plus machine translations of the new strings for German, Japanese, Portuguese, Italian and French.
 
-## v2.2.2
+## [2.2.2]
+### Changed
+- **World Time Unticked by Default**:
+  - `core.time` and `pf2e.worldClock.worldCreatedOn` are unticked by default on import. They can still be selected. See [issue #53](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/53).
 
-- Ignore "core.time" and "pf2e.worldClock.worldCreatedOn" values by default.
-  - These values can still be selected in from the importer dialog but will be unselected by default.
-  - You may run `game.settings.set('forien-copy-environment', 'selected-properties', undefined);` as a script macro to reset the values to their default.
-  - See [issue #53](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/53).
+## [2.2.1]
+### Changed
+- **Foundry V12 Compatibility**.
 
-## v2.2.1
+## [2.2.0]
+### Added
+- **Compendium Folders**:
+  - The compendium folder setup is exported again. Folders are matched to the new world, and missing folders are recreated from data included in the export.
+  - Exports made before v2.2.0 don't include this folder data, so please export your world settings again. See [issue #45](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/45).
 
-- v12 compatibility.
+## [2.1.9]
+### Added
+- **Number of Characters Setting**:
+  - Sets how many characters of each difference are shown (default 500). Helps with errors on very large export files. See [issue #43](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/43).
+- **Translations**: Machine translations of the new setting for German, Japanese and Portuguese.
 
-## v2.2.0
+## [2.1.8]
+### Changed
+- **Compendium Configuration**: No longer exported, since folder IDs don't match between worlds.
 
-- Re-added "core.compendiumConfiguration" setting to exports to export Compendium Folder structure mappings.
-  - Settings will try to map the folder IDs to the new world's folder IDs based on the compendium key.
-  - Added supporting folder data structure to the export.
-  - Settings will utilise the supporting folder data structure to re-create the folders where it can.
-  - **Important note**: any exports prior to v2.2.0 won't have this support folder data included in the exported file so might not map correctly on the new world. *Please export your world settings again.*
-  - See [issue #45](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/45).
+## [2.1.7]
+### Added
+- **Export File Name**: The world name is added to the exported settings file.
+- **Translations**: Portuguese by vithort.
 
-## v2.1.9
+### Changed
+- **Foundry V11 Compatibility**.
 
-- Added a module setting to set the maximum number of characters to display when displaying differences.
-  - This is to help with the issue where a "maximum call stack size exceeded" error may occur with very large export files (see [issue #43](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/43)).
-  - The default is 500 characters per difference.
-- Added machine translations for the new setting strings:
-  - German
-  - Japanese
-  - Portuguese
+## [2.1.6]
+### Fixed
+- **Invalid Settings**: Invalid settings are no longer exported. See [#35](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/35).
 
-## v2.1.8
+## [2.1.5]
+### Changed
+- **Non-GM Users**: Players can now use the module. They will see errors for settings they aren't allowed to change. See [#32](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/32).
+- **Manifest**: Removed deprecated manifest fields. See [#33](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/33).
 
-- Exclude "core.compendiumConfiguration" setting from exports due to the folder ID mapping not being consistent across worlds anyway.
+## [2.1.4]
+### Added
+- **Export File Name**: A timestamp is added to the exported file. See [#30](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/30).
+- **Copy as JSON**: Re-added the JSON summary download, renamed from "Save as JSON". See [#29](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/29).
 
-## v2.1.7
+## [2.1.3]
+### Fixed
+- **Import With Players**: Fixed the importer not importing anything when the world had players other than the GM.
 
-- Mark compatible with v11.
-- Append world name to the generated settings file on export.
-- Added Portuguese by vithort
+## [2.1.2]
+### Changed
+- **Reliability**: Better handling of module settings that previously broke the import, more logging, and a short wait so the server can save changes before the reload.
+- **Save as JSON**: Removed from the right-click menu, since it was easily confused with exporting settings.
 
-## v2.1.6
+## [2.1.1]
+### Fixed
+- **Settings Stored as Objects**: Fixed these not being compared correctly, which also fixes importing the enabled modules list.
 
-- Exclude invalid settings from export [#35](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/35)
+## [2.1.0]
+### Added
+- **Foundry V10 Compatibility**.
+- **Client Settings**: Now exported and imported correctly. See [#10](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/10).
+- **Grouped Settings**: Settings are grouped by module and collapsed by default. See [#13](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/13).
+- **Remembered Selection**: Ticked and unticked settings are remembered between imports. See [#18](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/18).
 
-## v2.1.5
+### Changed
+- **Sorting**: Settings in the import window are sorted.
 
-- Allow non-GM users to use the module.
-  - Fixes [#32](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/32)
-  - Users will see errors for any settings they do not have permission to update.
-- Removed deprecated fields in module manifest.
-  - Fixes [#33](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/33)
+## [2.0.7]
+### Added
+- **Translations**: German by brockhaus.
+- **Foundry V9 Compatibility**.
 
-## v2.1.4
+## [2.0.6]
+### Added
+- **Translations**: Japanese by touge.
 
-- Added timestamp to file export.
-  - As requested in [#30](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/30)
-- Re-added "Save as JSON" which was removed in v2.1.2 as requested in [#29](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/29)
-  - Have renamed this to `Copy as JSON` to help differentiate it from the `Export Settings` option.
+## [2.0.5]
+### Fixed
+- **Client Settings**: Fixed client settings not importing in Foundry 0.8.x.
 
-## v2.1.3
+## [2.0.4]
+### Added
+- **Module Opt-Out**: Module developers can keep their settings from being copied.
+- **Bug Reporter**: Re-added Bug Reporter compatibility.
 
-- Fixed issue where having a player other than GM in the world would prevent the importer from correctly importing anything.
+## [2.0.3]
+### Changed
+- **Foundry 0.8.4 Compatibility**.
 
-## v2.1.2
+## [2.0.2]
+### Changed
+- **Foundry 0.8.1 Compatibility**.
 
-* Better handling of config options to make it less likely to break on certain module's configuration settings.
-* Added more logging to assist with any future issues.
-* Adjust process order to make sure that the server has time to process the updates before the client reloads.
-* Removed the `Save as JSON` context menu option as it was rarely the desired action and was confusing (it was not the version that allowed the user to import the settings).
+## [2.0.1]
+### Changed
+- **Single Export File**: World and player settings are combined in one file.
+- **Import Selection**: World settings can be picked individually based on their differences.
+- **Translations**: Localization support finished.
 
-### v2.1.1
+## [2.0.0]
+### Added
+- **League of Foundry Developers**: The module moved to [League of Foundry Developers](https://discord.gg/gzemMfHURH) stewardship.
+- **Settings Menu**: Added a settings entry in addition to the right-click menu.
+- **Player Settings**: Export and import of player settings, picked individually based on their differences.
 
-* Fixed settings stored in an object not being compared correctly.
-  * Importantly, this makes the "Enabled Modules" setting to be correctly saved and imported.
+### Changed
+- **Foundry 0.8.0 Compatibility**.
 
-### v2.1.0
+## [1.1.1]
+### Changed
+- **Foundry 0.6.6 Compatibility**.
 
-* Added compatibility with Foundry VTT v10
-* Sorted the settings in the import dialog to make them easier to find.
-* Client settings are now correctly exported and imported.
-  * Request: [#10](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/10)
-* Grouped the settings by their module and collapsed them by default.
-  * Request: [#13](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/13)
-* Selecting (or unselecting) a setting will now remember that state across imports, saving you time from choosing just the selections you want.
-  * Request: [#18](https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment/issues/18)
+## [1.1.0]
+### Added
+- **Manifest Links**: Added manifest URLs to the JSON summary.
+- **Game Settings**: Export and import of game settings. Non-GM users can only import client settings.
 
-### v2.0.7
+### Changed
+- **Foundry 0.7.1 Compatibility**.
 
-* Added German translation thanks to brockhaus
-* Added Foundry VTT Core v9 compatibility
-
-### v2.0.6
-
-* Added Japanese translation thanks to touge
-
-### v2.0.5
-
-* Fix client side settings not importing in v0.8.x
-
-### v2.0.4
-
-* Allow module developers to opt out of settings being copied.
-* Re-added bug reporter compatibility since 0.8.2.
-
-### v2.0.3
-
-* Added 0.8.4 compatibility
-
-### v2.0.2
-
-* Tested 0.8.1 compatibility
-
-### v2.0.1
-
-* Merged world and player settings into a single json to simplify use.
-* Added differential style selection for world settings import.
-* Finished adding localization support.
-
-### v2.0.0
-
-* Migrated to [League of Foundry Developers](https://discord.gg/gzemMfHURH) stewardship
-* Added Settings configuration in addition to the right-click context menu
-* Added export/import of player settings including differential based selection
-* Tested and bumped compatible core version to 0.8.0
-
-### v1.1.1
-
-* Added 0.6.6 compatibility 
-
-## v1.1.0
-* Added manifest URL link to JSON environment structure
-* Added options to export and import game settings. Non-GM users can only import client-side settings.
-* Tested and bumped compatible core version to 0.7.1
-
-### v1.0.1
-* Initial release
+## [1.0.1]
+### Added
+- Initial release.
