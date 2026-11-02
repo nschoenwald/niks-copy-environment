@@ -1,0 +1,69 @@
+{
+  "niks-copy-environment": {
+    "menu": {
+      "copy": "Copiar como texto",
+      "save": "Copiar como JSON",
+      "export": "Exportar Configurações",
+      "import": "Importar Configurações"
+    },
+    "settings": {
+      "max-diff": "Número de caracteres",
+      "max-diff-hint": "Número máximo de caracteres a serem exibidos por diferença. Defina como 0 para mostrar tudo."
+    },
+    "message": "Lista gerada com Nik's Copy Environment: https://github.com/nschoenwald/niks-copy-environment",
+    "copiedToClipboard": "Dados do ambiente copiados para a área de transferência!",
+    "updatedReloading": "Configurações do mundo atualizadas. Recarregando o mundo em 4 segundos...",
+    "filters": {
+      "all": "Todos",
+      "changed": "Alterados"
+    },
+    "badges": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "orphaned": "Órfão",
+      "missing": "Não instalado",
+      "missingTooltip": "O módulo não está instalado nesta instância do Foundry VTT",
+      "system": "Sistema / Núcleo",
+      "players": "Jogadores"
+    },
+    "actions": {
+      "selectAll": "Selecionar tudo",
+      "activeOnly": "Somente ativos",
+      "deselectAll": "Desmarcar tudo"
+    },
+    "export": {
+      "title": "Exportar configurações e ambiente",
+      "searchPlaceholder": "Buscar configurações, módulos ou chaves...",
+      "summaryCount": "{settings} de {totalSettings} configurações, {players} jogadores selecionados",
+      "orphanedHint": "Configuração salva no banco de dados do mundo por um módulo desinstalado",
+      "includeCompendiumFolders": "Incluir mapeamentos de pastas de compêndios",
+      "button": "Exportar selecionados",
+      "nothingSelected": "Nenhuma configuração ou jogador selecionado para exportar.",
+      "success": "Configurações exportadas para {filename}",
+      "failed": "Falha ao exportar as configurações.",
+      "defaultTag": "Padrão",
+      "defaultSettingHint": "O valor é igual ao padrão do módulo",
+      "modifiedTag": "Modificado",
+      "unchangedTag": "Inalterado"
+    },
+    "import": {
+      "title": "Importar configurações e ambiente",
+      "searchPlaceholder": "Buscar configurações ou chaves...",
+      "summaryCount": "{settings} de {totalSettings} configurações, {players} alterações de jogadores selecionadas",
+      "invalidFileError": "Formato de arquivo de configurações inválido.",
+      "nothingSelected": "Nenhuma configuração ou alteração de jogador selecionada para importar.",
+      "noChangesApplied": "Nenhuma alteração foi aplicada.",
+      "errorOccurred": "Ocorreu um erro ao importar as configurações.",
+      "missingNotice": "Algumas configurações selecionadas pertencem a módulos que NÃO estão instalados neste servidor Foundry. Elas podem ser salvas no banco de dados, mas não terão efeito até que os módulos sejam instalados.",
+      "missingConfirmWarning": "Você selecionou {count} configuração(ões) de módulos não instalados. Deseja salvá-las mesmo assim no banco de dados do mundo?",
+      "save": "Importar configurações selecionadas",
+      "newValue": "Novo Valor",
+      "currentValue": "Valor Atual",
+      "notFound": "Os seguintes usuários no arquivo de importação não existem neste mundo e serão ignorados",
+      "existingPlayerValues": "Jogadores existentes que permanecem inalterados e serão ignorados:",
+      "updatedPlayer": "Configurações do jogador atualizadas para: {name}",
+      "warning": "Aviso",
+      "warningMessage": "Você escolheu não importar os módulos selecionados. Se isso não foi intencional, ative o valor \"core.moduleConfiguration\" acima."
+    }
+  }
+}

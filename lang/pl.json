@@ -10,12 +10,53 @@
       "max-diff": "Liczba znaków",
       "max-diff-hint": "Maksymalna liczba znaków do wyświetlenia różnicy. Ustaw na 0, aby wyświetlić wszystkie."
     },
-    "message": "Lista wygenerowana za pomocą Nik's Copy Environment: https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment",
+    "message": "Lista wygenerowana przez Nik's Copy Environment: https://github.com/nschoenwald/niks-copy-environment",
     "copiedToClipboard": "Dane środowiskowe skopiowane do schowka!",
-    "updatedReloading": "Zaktualizowano ustawienia świata. Przeładowanie świata za 5 sekund...",
+    "updatedReloading": "Zaktualizowano ustawienia świata. Świat zostanie przeładowany za 4 sekundy...",
+    "filters": {
+      "all": "Wszystkie",
+      "changed": "Zmienione"
+    },
+    "badges": {
+      "active": "Aktywny",
+      "inactive": "Nieaktywny",
+      "orphaned": "Osierocony",
+      "missing": "Niezainstalowany",
+      "missingTooltip": "Moduł nie jest zainstalowany w tej instancji Foundry VTT",
+      "system": "System / Rdzeń",
+      "players": "Gracze"
+    },
+    "actions": {
+      "selectAll": "Zaznacz wszystko",
+      "activeOnly": "Tylko aktywne",
+      "deselectAll": "Odznacz wszystko"
+    },
+    "export": {
+      "title": "Eksportuj ustawienia i środowisko",
+      "searchPlaceholder": "Szukaj ustawień, modułów lub kluczy...",
+      "summaryCount": "Wybrano {settings} z {totalSettings} ustawień, graczy: {players}",
+      "orphanedHint": "Ustawienie zapisane w bazie danych świata przez odinstalowany moduł",
+      "includeCompendiumFolders": "Uwzględnij przypisania folderów kompendiów",
+      "button": "Eksportuj zaznaczone",
+      "nothingSelected": "Nie wybrano żadnych ustawień ani graczy do eksportu.",
+      "success": "Wyeksportowano ustawienia do {filename}",
+      "failed": "Nie udało się wyeksportować ustawień.",
+      "defaultTag": "Domyślne",
+      "defaultSettingHint": "Wartość jest zgodna z domyślną wartością modułu",
+      "modifiedTag": "Zmienione",
+      "unchangedTag": "Bez zmian"
+    },
     "import": {
-      "title": "Ustawienia świata",
-      "save": "Importuj ustawienia",
+      "title": "Importuj ustawienia i środowisko",
+      "searchPlaceholder": "Szukaj ustawień lub kluczy...",
+      "summaryCount": "Wybrano {settings} z {totalSettings} ustawień, zmian graczy: {players}",
+      "invalidFileError": "Nieprawidłowy format pliku ustawień.",
+      "nothingSelected": "Nie wybrano żadnych ustawień ani zmian graczy do importu.",
+      "noChangesApplied": "Nie wprowadzono żadnych zmian.",
+      "errorOccurred": "Podczas importu ustawień wystąpił błąd.",
+      "missingNotice": "Niektóre wybrane ustawienia należą do modułów, które NIE są zainstalowane na tym serwerze Foundry. Można je zapisać w bazie danych, ale nie będą działać, dopóki moduły nie zostaną zainstalowane.",
+      "missingConfirmWarning": "Wybrano ustawienia niezainstalowanych modułów ({count}). Czy mimo to zapisać je w bazie danych świata?",
+      "save": "Importuj wybrane ustawienia",
       "newValue": "Nowa wartość",
       "currentValue": "Obecna wartość",
       "notFound": "Następujący użytkownicy w pliku importu nie istnieją w tym świecie i zostaną pominięci.",

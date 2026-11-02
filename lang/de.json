@@ -10,12 +10,53 @@
       "max-diff": "Anzahl von Charakteren",
       "max-diff-hint": "Maximale Anzahl der pro Unterschied anzuzeigenden Zeichen. Auf 0 setzen, um alle anzuzeigen."
     },
-    "message": "Die Liste wurde generiert mit Nik's Copy Environment: https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment",
+    "message": "Liste erstellt mit Nik's Copy Environment: https://github.com/nschoenwald/niks-copy-environment",
     "copiedToClipboard": "System Daten wurden in die Zwischenablage kopiert.",
-    "updatedReloading": "Einstellungen der Welt erneuert. Lade die Welt in 5 Sekunden neu...",
+    "updatedReloading": "Welteinstellungen aktualisiert. Die Welt wird in 4 Sekunden neu geladen...",
+    "filters": {
+      "all": "Alle",
+      "changed": "Geändert"
+    },
+    "badges": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "orphaned": "Verwaist",
+      "missing": "Nicht installiert",
+      "missingTooltip": "Das Modul ist in dieser Foundry-VTT-Instanz nicht installiert",
+      "system": "System / Kern",
+      "players": "Spieler"
+    },
+    "actions": {
+      "selectAll": "Alle auswählen",
+      "activeOnly": "Nur aktive",
+      "deselectAll": "Auswahl aufheben"
+    },
+    "export": {
+      "title": "Einstellungen & Umgebung exportieren",
+      "searchPlaceholder": "Einstellungen, Module oder Schlüssel suchen...",
+      "summaryCount": "{settings} von {totalSettings} Einstellungen, {players} Spieler ausgewählt",
+      "orphanedHint": "In der Weltdatenbank gespeicherte Einstellung eines deinstallierten Moduls",
+      "includeCompendiumFolders": "Kompendium-Ordnerzuordnungen einschließen",
+      "button": "Auswahl exportieren",
+      "nothingSelected": "Es sind keine Einstellungen oder Spieler für den Export ausgewählt.",
+      "success": "Einstellungen nach {filename} exportiert",
+      "failed": "Export der Einstellungen fehlgeschlagen.",
+      "defaultTag": "Standard",
+      "defaultSettingHint": "Der Wert entspricht dem Standard des Moduls",
+      "modifiedTag": "Geändert",
+      "unchangedTag": "Unverändert"
+    },
     "import": {
-      "title": "Welt Einstellungen",
-      "save": "Import Einstellungen",
+      "title": "Einstellungen & Umgebung importieren",
+      "searchPlaceholder": "Einstellungen oder Schlüssel suchen...",
+      "summaryCount": "{settings} von {totalSettings} Einstellungen, {players} Spieleränderungen ausgewählt",
+      "invalidFileError": "Ungültiges Format der Einstellungsdatei.",
+      "nothingSelected": "Es sind keine Einstellungen oder Spieleränderungen für den Import ausgewählt.",
+      "noChangesApplied": "Es wurden keine Änderungen übernommen.",
+      "errorOccurred": "Beim Importieren der Einstellungen ist ein Fehler aufgetreten.",
+      "missingNotice": "Einige ausgewählte Einstellungen gehören zu Modulen, die auf diesem Foundry-Server NICHT installiert sind. Sie können in der Datenbank gespeichert werden, wirken aber erst, wenn die Module installiert sind.",
+      "missingConfirmWarning": "Du hast {count} Einstellung(en) von nicht installierten Modulen ausgewählt. Sollen sie trotzdem in der Weltdatenbank gespeichert werden?",
+      "save": "Ausgewählte Einstellungen importieren",
       "newValue": "Neuer Wert",
       "currentValue": "Aktueller Wert",
       "notFound": "Die folgenden Spieler in der Import Datei existieren nicht in dieser Welt und werden ausgelassen.",

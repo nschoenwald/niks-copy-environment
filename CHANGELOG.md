@@ -2,6 +2,12 @@
 
 All notable changes to **Nik's Copy Environment (`niks-copy-environment`)** are documented in this file.
 
+## [14.4.0] - 2026-11-02
+### Added
+- New translations: Spanish and Czech. The module is now available in nine languages.
+- The German, French, Italian, Japanese, Polish and Brazilian Portuguese translations now cover the whole module.
+- The Portuguese translation is now listed as Brazilian Portuguese.
+
 ## [14.3.0] - 2026-10-26
 ### Fixed
 - **Import: Long Player Values Cut Off**:

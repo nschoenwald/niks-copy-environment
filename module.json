@@ -21,7 +21,7 @@
   "url": "https://github.com/nschoenwald/niks-copy-environment",
   "bugs": "https://github.com/nschoenwald/niks-copy-environment/issues",
   "changelog": "https://github.com/nschoenwald/niks-copy-environment/blob/main/CHANGELOG.md",
-  "version": "14.3.0",
+  "version": "14.4.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14"
@@ -39,24 +39,19 @@
       "path": "lang/en.json"
     },
     {
-      "lang": "ja",
-      "name": "日本語",
-      "path": "lang/ja.json"
-    },
-    {
       "lang": "de",
       "name": "Deutsch",
       "path": "lang/de.json"
     },
     {
-      "lang": "pt",
-      "name": "Português",
-      "path": "lang/pt.json"
+      "lang": "fr",
+      "name": "Français",
+      "path": "lang/fr.json"
     },
     {
-      "lang": "pl",
-      "name": "Polski",
-      "path": "lang/pl.json"
+      "lang": "es",
+      "name": "Español",
+      "path": "lang/es.json"
     },
     {
       "lang": "it",
@@ -64,9 +59,24 @@
       "path": "lang/it.json"
     },
     {
-      "lang": "fr",
-      "name": "Français",
-      "path": "lang/fr.json"
+      "lang": "pt-BR",
+      "name": "Português (Brasil)",
+      "path": "lang/pt-BR.json"
+    },
+    {
+      "lang": "ja",
+      "name": "日本語",
+      "path": "lang/ja.json"
+    },
+    {
+      "lang": "pl",
+      "name": "Polski",
+      "path": "lang/pl.json"
+    },
+    {
+      "lang": "cs",
+      "name": "Čeština",
+      "path": "lang/cs.json"
     }
   ],
   "packs": [],

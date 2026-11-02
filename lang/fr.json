@@ -10,12 +10,53 @@
       "max-diff": "Nombre de caractères",
       "max-diff-hint": "Nombre maximal de caractères pour montrer par différence. Régler à 0 pour tout montrer."
     },
-    "message": "Liste générée avec Nik's Copy Environment: https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment",
+    "message": "Liste générée avec Nik's Copy Environment : https://github.com/nschoenwald/niks-copy-environment",
     "copiedToClipboard": "Données d'environnement copiées dans le presse-papier!",
-    "updatedReloading": "Réglages du monde mises à jour. Rechargement du monde dans 5 sec...",
+    "updatedReloading": "Paramètres du monde mis à jour. Rechargement du monde dans 4 secondes...",
+    "filters": {
+      "all": "Tous",
+      "changed": "Modifiés"
+    },
+    "badges": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "orphaned": "Orphelin",
+      "missing": "Non installé",
+      "missingTooltip": "Le module n'est pas installé sur cette instance de Foundry VTT",
+      "system": "Système / Cœur",
+      "players": "Joueurs"
+    },
+    "actions": {
+      "selectAll": "Tout sélectionner",
+      "activeOnly": "Actifs uniquement",
+      "deselectAll": "Tout désélectionner"
+    },
+    "export": {
+      "title": "Exporter les paramètres et l'environnement",
+      "searchPlaceholder": "Rechercher des paramètres, modules ou clés...",
+      "summaryCount": "{settings} paramètres sur {totalSettings}, {players} joueurs sélectionnés",
+      "orphanedHint": "Paramètre enregistré dans la base de données du monde par un module désinstallé",
+      "includeCompendiumFolders": "Inclure les correspondances de dossiers de compendiums",
+      "button": "Exporter la sélection",
+      "nothingSelected": "Aucun paramètre ni joueur n'est sélectionné pour l'export.",
+      "success": "Paramètres exportés vers {filename}",
+      "failed": "Échec de l'export des paramètres.",
+      "defaultTag": "Par défaut",
+      "defaultSettingHint": "La valeur correspond à la valeur par défaut du module",
+      "modifiedTag": "Modifié",
+      "unchangedTag": "Inchangé"
+    },
     "import": {
-      "title": "Réglages du monde",
-      "save": "Réglages d'importation",
+      "title": "Importer les paramètres et l'environnement",
+      "searchPlaceholder": "Rechercher des paramètres ou des clés...",
+      "summaryCount": "{settings} paramètres sur {totalSettings}, {players} modifications de joueurs sélectionnées",
+      "invalidFileError": "Format de fichier de paramètres invalide.",
+      "nothingSelected": "Aucun paramètre ni modification de joueur n'est sélectionné pour l'import.",
+      "noChangesApplied": "Aucune modification n'a été appliquée.",
+      "errorOccurred": "Une erreur s'est produite lors de l'import des paramètres.",
+      "missingNotice": "Certains paramètres sélectionnés appartiennent à des modules qui ne sont PAS installés sur ce serveur Foundry. Ils peuvent être enregistrés dans la base de données, mais n'auront aucun effet tant que les modules ne seront pas installés.",
+      "missingConfirmWarning": "Vous avez sélectionné {count} paramètre(s) appartenant à des modules non installés. Voulez-vous quand même les enregistrer dans la base de données du monde ?",
+      "save": "Importer les paramètres sélectionnés",
       "newValue": "Nouvelle Valeur",
       "currentValue": "Valeur actuelle",
       "notFound": "Les utilisateurs suivants dans le fichier d'importation n'existent pas dans ce monde et seront ignorés.",

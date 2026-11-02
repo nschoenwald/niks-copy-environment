@@ -10,12 +10,53 @@
       "max-diff": "Numero di caratteri",
       "max-diff-hint": "Massimo numero di caratteri da mostrare per differenza. Imposta a 0 per mostrare tutto."
     },
-    "message": "Elenco generato con Nik's Copy Environment: https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment",
+    "message": "Elenco generato con Nik's Copy Environment: https://github.com/nschoenwald/niks-copy-environment",
     "copiedToClipboard": "Dati ambientali copiati negli appunti!",
-    "updatedReloading": "Impostazioni del mondo aggiornate. Ricaricamento mondo in 5sec...",
+    "updatedReloading": "Impostazioni del mondo aggiornate. Il mondo verrà ricaricato tra 4 secondi...",
+    "filters": {
+      "all": "Tutti",
+      "changed": "Modificati"
+    },
+    "badges": {
+      "active": "Attivo",
+      "inactive": "Inattivo",
+      "orphaned": "Orfano",
+      "missing": "Non installato",
+      "missingTooltip": "Il modulo non è installato in questa istanza di Foundry VTT",
+      "system": "Sistema / Core",
+      "players": "Giocatori"
+    },
+    "actions": {
+      "selectAll": "Seleziona tutto",
+      "activeOnly": "Solo attivi",
+      "deselectAll": "Deseleziona tutto"
+    },
+    "export": {
+      "title": "Esporta impostazioni e ambiente",
+      "searchPlaceholder": "Cerca impostazioni, moduli o chiavi...",
+      "summaryCount": "{settings} di {totalSettings} impostazioni, {players} giocatori selezionati",
+      "orphanedHint": "Impostazione salvata nel database del mondo da un modulo disinstallato",
+      "includeCompendiumFolders": "Includi le associazioni delle cartelle dei compendi",
+      "button": "Esporta selezionati",
+      "nothingSelected": "Nessuna impostazione o giocatore selezionato per l'esportazione.",
+      "success": "Impostazioni esportate in {filename}",
+      "failed": "Esportazione delle impostazioni non riuscita.",
+      "defaultTag": "Predefinito",
+      "defaultSettingHint": "Il valore coincide con quello predefinito del modulo",
+      "modifiedTag": "Modificato",
+      "unchangedTag": "Invariato"
+    },
     "import": {
-      "title": "Impostazioni Mondo",
-      "save": "Importa Impostazioni",
+      "title": "Importa impostazioni e ambiente",
+      "searchPlaceholder": "Cerca impostazioni o chiavi...",
+      "summaryCount": "{settings} di {totalSettings} impostazioni, {players} modifiche ai giocatori selezionate",
+      "invalidFileError": "Formato del file delle impostazioni non valido.",
+      "nothingSelected": "Nessuna impostazione o modifica ai giocatori selezionata per l'importazione.",
+      "noChangesApplied": "Non è stata applicata alcuna modifica.",
+      "errorOccurred": "Si è verificato un errore durante l'importazione delle impostazioni.",
+      "missingNotice": "Alcune impostazioni selezionate appartengono a moduli NON installati su questo server Foundry. Possono essere salvate nel database, ma non avranno effetto finché i moduli non saranno installati.",
+      "missingConfirmWarning": "Hai selezionato {count} impostazione/i di moduli non installati. Vuoi salvarle comunque nel database del mondo?",
+      "save": "Importa impostazioni selezionate",
       "newValue": "Nuovo Valore",
       "currentValue": "Valore Attuale",
       "notFound": "I seguenti utenti nel file di importazione non esistono in questo mondo e verranno ignorati.",

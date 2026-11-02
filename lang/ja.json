@@ -10,12 +10,53 @@
       "max-diff": "文字数",
       "max-diff-hint": "差異ごとに表示する最大文字数。 すべてを表示するには 0 に設定します。"
     },
-    "message": "このリストは「Nik's Copy Environment」で作成されました： https://github.com/League-of-Foundry-Developers/foundryvtt-forien-copy-environment",
+    "message": "Nik's Copy Environmentで生成したリスト: https://github.com/nschoenwald/niks-copy-environment",
     "copiedToClipboard": "環境データをクリップボードにコピーしました！",
-    "updatedReloading": "ワールド設定を更新しました。5秒後に再読み込みします……",
+    "updatedReloading": "ワールド設定を更新しました。4秒後にワールドを再読み込みします...",
+    "filters": {
+      "all": "すべて",
+      "changed": "変更あり"
+    },
+    "badges": {
+      "active": "有効",
+      "inactive": "無効",
+      "orphaned": "孤立",
+      "missing": "未インストール",
+      "missingTooltip": "このFoundry VTTにはモジュールがインストールされていません",
+      "system": "システム / コア",
+      "players": "プレイヤー"
+    },
+    "actions": {
+      "selectAll": "すべて選択",
+      "activeOnly": "有効のみ",
+      "deselectAll": "すべて選択解除"
+    },
+    "export": {
+      "title": "設定と環境をエクスポート",
+      "searchPlaceholder": "設定、モジュール、キーを検索...",
+      "summaryCount": "{totalSettings}件中{settings}件の設定、{players}人のプレイヤーを選択中",
+      "orphanedHint": "アンインストールされたモジュールがワールドのデータベースに保存した設定",
+      "includeCompendiumFolders": "コンペンディウムのフォルダ割り当てを含める",
+      "button": "選択した項目をエクスポート",
+      "nothingSelected": "エクスポートする設定またはプレイヤーが選択されていません。",
+      "success": "設定を{filename}にエクスポートしました",
+      "failed": "設定のエクスポートに失敗しました。",
+      "defaultTag": "初期値",
+      "defaultSettingHint": "設定値がモジュールの初期値と同じです",
+      "modifiedTag": "変更済み",
+      "unchangedTag": "変更なし"
+    },
     "import": {
-      "title": "ワールドの設定",
-      "save": "インポート設定",
+      "title": "設定と環境をインポート",
+      "searchPlaceholder": "設定またはキーを検索...",
+      "summaryCount": "{totalSettings}件中{settings}件の設定、{players}件のプレイヤー変更を選択中",
+      "invalidFileError": "設定ファイルの形式が無効です。",
+      "nothingSelected": "インポートする設定またはプレイヤー変更が選択されていません。",
+      "noChangesApplied": "変更は適用されませんでした。",
+      "errorOccurred": "設定のインポート中にエラーが発生しました。",
+      "missingNotice": "選択した設定の一部は、このFoundryサーバーにインストールされていないモジュールのものです。データベースには保存できますが、モジュールがインストールされるまで効果はありません。",
+      "missingConfirmWarning": "未インストールのモジュールの設定を{count}件選択しています。それでもワールドのデータベースに保存しますか？",
+      "save": "選択した設定をインポート",
       "newValue": "新しい値",
       "currentValue": "現在の値",
       "notFound": "インポートファイルに含まれる次のユーザーは、このワールドに存在しないため、スキップされます。",
