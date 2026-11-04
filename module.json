@@ -21,7 +21,7 @@
   "url": "https://github.com/nschoenwald/niks-copy-environment",
   "bugs": "https://github.com/nschoenwald/niks-copy-environment/issues",
   "changelog": "https://github.com/nschoenwald/niks-copy-environment/blob/main/CHANGELOG.md",
-  "version": "14.4.0",
+  "version": "14.4.1",
   "compatibility": {
     "minimum": "14",
     "verified": "14",
@@ -50,11 +50,6 @@
       "path": "lang/fr.json"
     },
     {
-      "lang": "es",
-      "name": "Español",
-      "path": "lang/es.json"
-    },
-    {
       "lang": "it",
       "name": "Italiano",
       "path": "lang/it.json"
@@ -73,11 +68,6 @@
       "lang": "pl",
       "name": "Polski",
       "path": "lang/pl.json"
-    },
-    {
-      "lang": "cs",
-      "name": "Čeština",
-      "path": "lang/cs.json"
     }
   ],
   "packs": [],
