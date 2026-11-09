@@ -61,7 +61,7 @@
       "currentValue": "Valeur actuelle",
       "notFound": "Les utilisateurs suivants dans le fichier d'importation n'existent pas dans ce monde et seront ignorés.",
       "existingPlayerValues": "Les joueurs existants qui ne sont pas modifiés seront ignorés:",
-      "updatedPlayer": "Paramètre des joueurs mis à jour pour: {name}",
+      "updatedPlayer": "Paramètre du joueur mis à jour pour: {name}",
       "warning": "Avertissement",
       "warningMessage": "Vous avez choisi de ne pas importer les modules sélectionnés. Si cela n’était pas intentionnel, activez la valeur \"core.moduleConfiguration\" ci-dessus."
     }

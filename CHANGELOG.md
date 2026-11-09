@@ -2,6 +2,10 @@
 
 All notable changes to **Nik's Copy Environment (`niks-copy-environment`)** are documented in this file.
 
+## [14.4.2] - 2026-11-09
+### Changed
+- **French translation**: Fully reviewed by Kameleau, including the parts added since the module was renamed. Thank you!
+
 ## [14.4.1] - 2026-11-04
 ### Removed
 - Removed the Spanish and Czech translations. They were machine-translated and never checked by a native speaker. Players who use Foundry in one of these languages now see this module in English. Translations by native speakers are welcome as an issue or pull request.

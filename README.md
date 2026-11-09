@@ -61,9 +61,9 @@ Copy your Foundry setup (core, system and module versions) in one click, and mov
 
 ## 🌐 Languages
 
-🇬🇧 English · 🇩🇪 Deutsch (thanks brockhaus) · 🇫🇷 Français (thanks rectulo) · 🇮🇹 Italiano (thanks [@GregoryWarn](https://github.com/GregoryWarn)) · 🇧🇷 Português (Brasil) (thanks vithort) · 🇯🇵 日本語 (thanks touge) · 🇵🇱 Polski (thanks Lioheart)
+🇬🇧 English · 🇩🇪 Deutsch (thanks brockhaus) · 🇫🇷 Français (thanks rectulo, reviewed by Kameleau) · 🇮🇹 Italiano (thanks [@GregoryWarn](https://github.com/GregoryWarn)) · 🇧🇷 Português (Brasil) (thanks vithort) · 🇯🇵 日本語 (thanks touge) · 🇵🇱 Polski (thanks Lioheart)
 
-The parts of the translations added since the module was renamed were written with AI help and may contain mistakes. Corrections are welcome as an issue or pull request.
+The parts of the translations (except French) added since the module was renamed were written with AI help and may contain mistakes. Corrections are welcome as an issue or pull request.
 
 ---
 
